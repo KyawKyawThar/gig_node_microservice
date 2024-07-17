@@ -5,7 +5,8 @@ import http from 'http';
 import { winstonLogger } from '@notifications/logger';
 import { config } from '@notifications/config';
 import { healthRoute } from '@notifications/router';
-import { checkConnection } from './elasticSearch';
+import { checkConnection } from '@notifications/elasticSearch';
+import { createConnection } from '@notifications/queues/connection';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationServer', 'debug');
 
@@ -16,7 +17,9 @@ export function start(app: Application): void {
   startElasticSearch();
 }
 
-async function startQueue(): Promise<void> {}
+async function startQueue(): Promise<void> {
+  await createConnection();
+}
 
 function startElasticSearch(): void {
   checkConnection();
