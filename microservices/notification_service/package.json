@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon --watch src --exec ts-node src/app.ts | pino-pretty -c",
+    "dev": "nodemon -r tsconfig-paths/register src/app.ts | pino-pretty -c",
     "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json"
   },
   "keywords": [],
@@ -26,6 +26,7 @@
     "tsconfig-paths": "^4.2.0"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^8.14.0",
     "amqplib": "^0.10.4",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
@@ -37,6 +38,7 @@
     "pino-pretty": "^11.2.1",
     "typescript": "^5.5.3",
     "typescript-transform-paths": "^3.4.7",
-    "winston": "^3.13.1"
+    "winston": "^3.13.1",
+    "winston-elasticsearch": "^0.19.0"
   }
 }
