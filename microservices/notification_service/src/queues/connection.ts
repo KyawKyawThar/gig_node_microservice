@@ -5,7 +5,6 @@ import { Logger } from 'winston';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationServiceQueue', 'debug');
 
-console.log(config);
 export async function createConnection(): Promise<Channel | undefined> {
   try {
     const connection: Connection = await amqplib.connect(`${config.RABBITMQ_ENDPOINT}`);

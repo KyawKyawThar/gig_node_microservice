@@ -1,7 +1,13 @@
 export interface Config {
-  SERVER_PORT: string | undefined;
-  NODE_ENV: string | undefined;
-  CLIENT_URL: string | undefined;
-  RABBITMQ_ENDPOINT: string | undefined;
-  ELASTIC_SEARCH_URL: string | undefined;
+  SERVER_PORT: string;
+  NODE_ENV: string;
+  CLIENT_URL: string;
+  RABBITMQ_ENDPOINT: string;
+  ELASTIC_SEARCH_URL: string;
+  EMAIL_EXCHANGE_NAME: string;
+  EMAIL_QUEUE_NAME: string;
+  EMAIL_ROUTING_KEY: string;
+  ORDER_EXCHANGE_NAME: string;
+  ORDER_QUEUE_NAME: string;
+  ORDER_ROUTING_KEY: string;
 }
