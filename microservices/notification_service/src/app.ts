@@ -1,6 +1,5 @@
 import express, { Express } from 'express';
 import { Logger } from 'winston';
-
 import { winstonLogger } from '@notifications/logger';
 import { config } from '@notifications/config';
 import { start } from '@notifications/server';
