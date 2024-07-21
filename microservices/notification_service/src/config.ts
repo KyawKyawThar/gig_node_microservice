@@ -1,6 +1,5 @@
 import { Config } from '@notifications/types/envConfigTypes';
-
-const dotenv = require('dotenv');
+import dotenv from 'dotenv';
 
 dotenv.config();
 function createConfig(): Config {

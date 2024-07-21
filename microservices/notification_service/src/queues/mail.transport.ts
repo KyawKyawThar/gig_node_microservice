@@ -1,6 +1,5 @@
 import { config } from '@notifications/config';
 import { emailTemplate } from '@notifications/helper';
-
 import { winstonLogger } from '@notifications/logger';
 import { mailTransport } from '@notifications/types/mailTransportType';
 import { Logger } from 'winston';
