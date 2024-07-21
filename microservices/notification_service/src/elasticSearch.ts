@@ -1,6 +1,5 @@
 import { Logger } from 'winston';
 import { Client } from '@elastic/elasticsearch';
-
 import { winstonLogger } from '@notifications/logger';
 import { config } from '@notifications/config';
 import { ClusterHealthResponse } from '@elastic/elasticsearch/lib/api/types';

@@ -29,7 +29,7 @@ describe('EmailConsumer', () => {
       jest.spyOn(connection, 'createConnection').mockReturnValue(channel as never);
 
       const connectionChannel: amqp.Channel | undefined = await connection.createConnection();
-      if (connectionChannel) return await consumeAuthEmailMessage(connectionChannel);
+      if (connectionChannel) {return await consumeAuthEmailMessage(connectionChannel);}
       expect(connectionChannel!.assertExchange).toHaveBeenCalledWith('email-notification', 'direct');
       expect(connectionChannel!.assertQueue).toHaveBeenCalledTimes(1);
       expect(connectionChannel!.consume).toHaveBeenCalledTimes(1);
@@ -52,7 +52,7 @@ describe('EmailConsumer', () => {
       jest.spyOn(connection, 'createConnection').mockReturnValue(channel as never);
 
       const connectionChannel: amqp.Channel | undefined = await connection.createConnection();
-      if (connectionChannel) await consumeOrderEmailMessage(connectionChannel);
+      if (connectionChannel) {await consumeOrderEmailMessage(connectionChannel);}
       expect(connectionChannel!.assertExchange).toHaveBeenCalledWith('order-notification', 'direct');
       expect(connectionChannel!.assertQueue).toHaveBeenCalledTimes(1);
       expect(connectionChannel!.consume).toHaveBeenCalledTimes(1);

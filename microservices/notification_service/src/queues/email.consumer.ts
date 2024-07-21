@@ -1,11 +1,11 @@
 import { Logger } from 'winston';
 import { Channel, ConsumeMessage } from 'amqplib';
-
 import { config } from '@notifications/config';
 import { winstonLogger } from '@notifications/logger';
 import { createConnection } from '@notifications/queues/connection';
-import { sendEmail } from './mail.transport';
 import { mailTransport } from '@notifications/types/mailTransportType';
+
+import { sendEmail } from './mail.transport';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationEmailConsumer', 'debug');
 
@@ -13,7 +13,7 @@ export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
   try {
     if (!channel) {
       const createChannel = await createConnection();
-      if (createChannel) channel = createChannel;
+      if (createChannel) {channel = createChannel;}
     }
 
     await channel.assertExchange(config.EMAIL_EXCHANGE_NAME, 'direct');
@@ -51,7 +51,7 @@ export async function consumeOrderEmailMessage(channel: Channel): Promise<void> 
     if (!channel) {
       const createChannel = await createConnection();
 
-      if (createChannel) channel = createChannel;
+      if (createChannel) {channel = createChannel;}
     }
     await channel.assertExchange(config.ORDER_EXCHANGE_NAME, 'direct');
 

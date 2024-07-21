@@ -1,14 +1,15 @@
-import { Application } from 'express';
-import { Logger } from 'winston';
 import http from 'http';
 
+import { Application } from 'express';
+import { Logger } from 'winston';
 import { winstonLogger } from '@notifications/logger';
 import { config } from '@notifications/config';
 import { healthRoute } from '@notifications/router';
 import { checkConnection } from '@notifications/elasticSearch';
 import { createConnection } from '@notifications/queues/connection';
-import { consumeAuthEmailMessage } from './queues/email.consumer';
 import { IEmailMessageDetails } from '@notifications/types/emailMessageDetailType';
+
+import { consumeAuthEmailMessage } from './queues/email.consumer';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationServer', 'debug');
 

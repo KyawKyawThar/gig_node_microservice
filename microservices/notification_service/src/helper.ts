@@ -1,8 +1,8 @@
+import path from 'path';
+
 import Email from 'email-templates';
 import nodemailer from 'nodemailer';
-import path from 'path';
 import { Logger } from 'winston';
-
 import { config } from '@notifications/config';
 import { winstonLogger } from '@notifications/logger';
 import { mailTransport } from '@notifications/types/mailTransportType';
