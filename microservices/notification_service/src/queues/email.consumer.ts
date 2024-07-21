@@ -4,6 +4,8 @@ import { Channel, ConsumeMessage } from 'amqplib';
 import { config } from '@notifications/config';
 import { winstonLogger } from '@notifications/logger';
 import { createConnection } from '@notifications/queues/connection';
+import { sendEmail } from './mail.transport';
+import { mailTransport } from '@notifications/types/mailTransportType';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationEmailConsumer', 'debug');
 
@@ -20,10 +22,21 @@ export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
 
     await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
       //consume the message
-      console.log(JSON.parse(msg!.content.toString()));
-      if (msg) {
-        //const message = JSON.parse(msg!.content.toString());
 
+      //msg is coming from connection.publish from server.ts
+      // console.log(JSON.parse(msg!.content.toString()));
+      if (msg) {
+        const { receiverEmail, username, verifyLink, resetLink, template, otp } = JSON.parse(msg!.content.toString());
+
+        const mailTransport: mailTransport = {
+          appLink: `${config.CLIENT_URL}`,
+          appIcon: `${config.APP_ICON}`,
+          username,
+          otp,
+          verifyLink,
+          resetLink
+        };
+        await sendEmail(template, receiverEmail, mailTransport);
         channel.ack(msg);
       }
     });
@@ -32,6 +45,7 @@ export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
   }
 }
 
+//can also create consumeOfferEmailMessage
 export async function consumeOrderEmailMessage(channel: Channel): Promise<void> {
   try {
     if (!channel) {
@@ -48,6 +62,66 @@ export async function consumeOrderEmailMessage(channel: Channel): Promise<void> 
       console.log(JSON.parse(msg!.content.toString()));
 
       if (msg) {
+        const {
+          receiverEmail,
+          username,
+          template,
+          sender,
+          offerLink,
+          amount,
+          buyerUsername,
+          sellerUsername,
+          title,
+          description,
+          deliveryDays,
+          orderId,
+          orderDue,
+          requirements,
+          orderUrl,
+          originalDate,
+          newDate,
+          reason,
+          subject,
+          header,
+          type,
+          message,
+          serviceFee,
+          total
+        } = JSON.parse(msg!.content.toString());
+        const mailTransport: mailTransport = {
+          appLink: `${config.CLIENT_URL}`,
+          appIcon: 'https://i.ibb.co/Kyp2m0t/cover.png',
+          username,
+          sender,
+          offerLink,
+          amount,
+          buyerUsername,
+          sellerUsername,
+          title,
+          description,
+          deliveryDays,
+          orderId,
+          orderDue,
+          requirements,
+          orderUrl,
+          originalDate,
+          newDate,
+          reason,
+          subject,
+          header,
+          type,
+          message,
+          serviceFee,
+          total
+        };
+
+        if (template === 'orderPlaced') {
+          await sendEmail('orderPlaced', receiverEmail, mailTransport);
+          await sendEmail('orderReceipt', receiverEmail, mailTransport);
+        } else {
+          await sendEmail(template, receiverEmail, mailTransport);
+        }
+
         channel.ack(msg);
       }
     });
