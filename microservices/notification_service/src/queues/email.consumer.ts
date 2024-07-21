@@ -9,7 +9,6 @@ import { mailTransport } from '@notifications/types/mailTransportType';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationEmailConsumer', 'debug');
 
-console.log(config.APP_ICON);
 export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
   try {
     if (!channel) {
@@ -25,7 +24,7 @@ export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
       //consume the message
 
       //msg is coming from connection.publish from server.ts
-      console.log(JSON.parse(msg!.content.toString()));
+      // console.log(JSON.parse(msg!.content.toString()));
       if (msg) {
         const { receiverEmail, username, verifyLink, resetLink, template, otp } = JSON.parse(msg!.content.toString());
 

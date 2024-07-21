@@ -45,8 +45,8 @@ async function startQueue(): Promise<void> {
   }
 }
 
-function startElasticSearch(): void {
-  checkConnection();
+async function startElasticSearch(): Promise<void> {
+  await checkConnection();
 }
 
 function startServer(app: Application): void {
