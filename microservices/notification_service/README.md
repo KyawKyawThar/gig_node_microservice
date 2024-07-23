@@ -12,7 +12,6 @@
   - `order extension approval`
   - `order delivered`
 - Notification service uses these tools as the main tools
-  - `Your shared library`
   - `NodeJS`
   - `Express`
   - `Typescript`
