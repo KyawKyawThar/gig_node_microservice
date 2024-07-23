@@ -58,7 +58,6 @@ function startServer(app: Application): void {
       logger.info(`Notification server is running on port ${config.SERVER_PORT}`);
     });
   } catch (err) {
-    logger.error('Start Server failed');
     logger.log('error', 'NotificationService startServer() method', err);
   }
 }
