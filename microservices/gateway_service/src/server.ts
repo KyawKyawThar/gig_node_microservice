@@ -59,6 +59,7 @@ export class GateWayService {
     app.use(compression());
 
     app.use(json({ limit: '200mb' }));
+
     app.use(urlencoded({ extended: true, limit: '200mb' }));
   }
 
@@ -84,6 +85,8 @@ export class GateWayService {
 
       if (err instanceof CustomError) {
         res.status(err.statusCode).json(err.serializeError());
+      } else {
+        res.status(500).json({ message: 'An unexpected error occurred' });
       }
       next();
     });

@@ -13,7 +13,9 @@ export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
   try {
     if (!channel) {
       const createChannel = await createConnection();
-      if (createChannel) {channel = createChannel;}
+      if (createChannel) {
+        channel = createChannel;
+      }
     }
 
     await channel.assertExchange(config.EMAIL_EXCHANGE_NAME, 'direct');
@@ -51,7 +53,9 @@ export async function consumeOrderEmailMessage(channel: Channel): Promise<void> 
     if (!channel) {
       const createChannel = await createConnection();
 
-      if (createChannel) {channel = createChannel;}
+      if (createChannel) {
+        channel = createChannel;
+      }
     }
     await channel.assertExchange(config.ORDER_EXCHANGE_NAME, 'direct');
 
