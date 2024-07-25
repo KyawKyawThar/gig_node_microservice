@@ -6,5 +6,11 @@ export interface Config {
   RABBITMQ_ENDPOINT: string;
   ELASTIC_SEARCH_URL: string;
   DB_SOURCE: string;
-  JWT_TOKEN: string;
+  JWT_SECRET: string;
+  SALT_HASH: string;
+  EMAIL_EXCHANGE_NAME: string;
+  EMAIL_QUEUE_NAME: string;
+  EMAIL_ROUTING_KEY: string;
+  BASE_PATH: string;
+  AUTH: string;
 }

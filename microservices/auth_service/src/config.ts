@@ -11,7 +11,13 @@ function createConfig(): Config {
     API_GATEWAY_URL: process.env.API_GATEWAY_URL!,
     RABBITMQ_ENDPOINT: process.env.RABBITMQ_ENDPOINT!,
     DB_SOURCE: process.env.DB_SOURCE!,
-    JWT_TOKEN: process.env.JWT!
+    JWT_SECRET: process.env.JWT!,
+    SALT_HASH: process.env.SALT_HASH!,
+    EMAIL_EXCHANGE_NAME: process.env.EEMAIL_EXCHANGE_NAME!,
+    EMAIL_QUEUE_NAME: process.env.EMAIL_QUEUE_NAME!,
+    EMAIL_ROUTING_KEY: process.env.EMAIL_ROUTING_KEY!,
+    BASE_PATH: process.env.BASE_PATH!,
+    AUTH: process.env.AUTH!
   };
 }
 

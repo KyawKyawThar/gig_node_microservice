@@ -8,7 +8,7 @@ export async function createConnection(): Promise<Channel | undefined> {
   try {
     const connection: Connection = await amqplib.connect(`${config.RABBITMQ_ENDPOINT}`);
     const channel: Channel = await connection.createChannel();
-    logger.info('Notification server was created connection to channel successfully...');
+    logger.info('Notification service was created connection to channel successfully...');
     closeConnection(channel, connection);
     return channel;
   } catch (error) {

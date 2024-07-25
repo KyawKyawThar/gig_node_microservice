@@ -5,22 +5,25 @@ import { Application, NextFunction, Request, Response, json, urlencoded } from '
 import { verify } from 'jsonwebtoken';
 import { IAuthPayload } from '@auth/types/authTypes';
 import { IErrorResponse } from '@auth/types/errorHandlerTypes';
-import { checkConnection } from '@auth/elasticSearch';
+//import { checkConnection } from '@auth/elasticSearch';
 import { appRoutes } from '@auth/routes';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
-
+import { createConnection } from '@auth/queues/connection';
+import { Channel } from 'amqplib';
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'authDatabaseServer', 'debug');
+
+export let authChannel: Channel;
 
 export function start(app: Application) {
   applyMiddleware(app);
   standardMiddleware(app);
   routeMiddleware(app);
   startQueue();
-  startElasticSearch();
+  // startElasticSearch();
   errorHandler(app);
 }
 
@@ -51,7 +54,7 @@ function applyMiddleware(app: Application): void {
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       const token = req.headers.authorization.split(' ')[1];
 
-      const payload = verify(token, config.JWT_TOKEN) as IAuthPayload;
+      const payload = verify(token, config.JWT_SECRET) as IAuthPayload;
       req.currentUser = payload;
     }
     next();
@@ -68,11 +71,13 @@ function routeMiddleware(app: Application): void {
   appRoutes(app);
 }
 
-async function startQueue(): Promise<void> {}
-
-function startElasticSearch(): void {
-  checkConnection();
+async function startQueue(): Promise<void> {
+  authChannel = (await createConnection()) as Channel;
 }
+
+// function startElasticSearch(): void {
+//   checkConnection();
+// }
 
 function errorHandler(app: Application): void {
   app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
