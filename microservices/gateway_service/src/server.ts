@@ -14,6 +14,7 @@ import compression from 'compression';
 import cors from 'cors';
 import { elasticSearch } from '@gateway/elasticSearch';
 import { appRoutes } from '@gateway/routes';
+import { AxiosAuthInstance } from '@gateway/api/authService';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway server', 'debug');
 
@@ -52,6 +53,13 @@ export class GateWayService {
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
       })
     );
+
+    app.use((req: Request, _res: Response, next: NextFunction) => {
+      if (!req.session?.jwt) {
+        AxiosAuthInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
+      }
+      next();
+    });
     app.use(hpp());
     app.use(helmet());
   }
@@ -81,7 +89,7 @@ export class GateWayService {
     });
 
     app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-      logger.log('err', `Gateway service ${err.comingFrom}`, err);
+      logger.log('error', `Gateway service ${err.comingFrom}`, err);
 
       if (err instanceof CustomError) {
         res.status(err.statusCode).json(err.serializeError());
@@ -97,7 +105,7 @@ export class GateWayService {
       const httpServer: http.Server = new http.Server(app);
       this.startHTTPServer(httpServer);
     } catch (err) {
-      logger.log('err', 'Gateway service startServer() method error: ', err);
+      logger.log('error', 'Gateway service startServer() method error: ', err);
     }
   }
 
@@ -109,7 +117,7 @@ export class GateWayService {
         logger.info(`Gateway service is running on port: ${config.GATEWAY_SERVER_PORT}`);
       });
     } catch (err) {
-      logger.log('err', 'Gateway service startHTTPServer() method error: ', err);
+      logger.log('error', 'Gateway service startHTTPServer() method error: ', err);
     }
   }
 }

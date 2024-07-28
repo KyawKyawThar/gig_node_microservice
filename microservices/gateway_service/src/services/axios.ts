@@ -3,10 +3,10 @@ import axios from 'axios';
 import { sign } from 'jsonwebtoken';
 
 export class AxiosService {
-  public axios: ReturnType<typeof axios.create>;
+  public kkt: ReturnType<typeof axios.create>;
 
   constructor(baseURL: string, serviceName?: string) {
-    this.axios = this.axiosCreateInstance(baseURL, serviceName);
+    this.kkt = this.axiosCreateInstance(baseURL, serviceName);
   }
   public axiosCreateInstance(baseURL: string, serviceName?: string): ReturnType<typeof axios.create> {
     let requestGatewayToken = '';

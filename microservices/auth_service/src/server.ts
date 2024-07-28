@@ -1,3 +1,5 @@
+import http from 'http';
+
 import { Logger } from 'winston';
 import { winstonLogger } from '@auth/logger';
 import { config } from '@auth/config';
@@ -5,7 +7,7 @@ import { Application, NextFunction, Request, Response, json, urlencoded } from '
 import { verify } from 'jsonwebtoken';
 import { IAuthPayload } from '@auth/types/authTypes';
 import { IErrorResponse } from '@auth/types/errorHandlerTypes';
-//import { checkConnection } from '@auth/elasticSearch';
+import { checkConnection } from '@auth/elasticSearch';
 import { appRoutes } from '@auth/routes';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
@@ -14,7 +16,8 @@ import cors from 'cors';
 import compression from 'compression';
 import { createConnection } from '@auth/queues/connection';
 import { Channel } from 'amqplib';
-const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'authDatabaseServer', 'debug');
+
+const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'authServer', 'debug');
 
 export let authChannel: Channel;
 
@@ -23,8 +26,9 @@ export function start(app: Application) {
   standardMiddleware(app);
   routeMiddleware(app);
   startQueue();
-  // startElasticSearch();
-  errorHandler(app);
+  startElasticSearch();
+  authErrorHandler(app);
+  startServer(app);
 }
 
 function applyMiddleware(app: Application): void {
@@ -75,13 +79,13 @@ async function startQueue(): Promise<void> {
   authChannel = (await createConnection()) as Channel;
 }
 
-// function startElasticSearch(): void {
-//   checkConnection();
-// }
+function startElasticSearch(): void {
+  checkConnection();
+}
 
-function errorHandler(app: Application): void {
+function authErrorHandler(app: Application): void {
   app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.log('err', `Auth service ${err.comingFrom}`, err);
+    logger.log('error', `Auth service ${err.comingFrom}`, err);
 
     // Check if the error has a serializeError method, indicating it's a custom error
     if (typeof err.serializeError === 'function') {
@@ -92,4 +96,18 @@ function errorHandler(app: Application): void {
     }
     next();
   });
+}
+
+function startServer(app: Application): void {
+  try {
+    logger.info(`Authentication server has started with process id ${process.pid}`);
+
+    const server = new http.Server(app);
+
+    server.listen(config.AUTH_SERVER_PORT, () => {
+      logger.info(`Authentication server running on port ${config.AUTH_SERVER_PORT}`);
+    });
+  } catch (err) {
+    logger.log('error', 'Auth service startHTTPServer() method error: ', err);
+  }
 }

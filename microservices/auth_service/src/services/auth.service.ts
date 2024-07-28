@@ -21,6 +21,7 @@ export function firstLetterUpperCase(input: string): string {
 
 export async function createUser(data: IAuthDocument): Promise<IAuthDocument | undefined> {
   try {
+    logger.info('Creating user func called....');
     const result = await AuthModel.create(data);
 
     const buyerMessageDetail: IAuthBuyerMessageDetails = {
@@ -92,6 +93,7 @@ export async function getUserByEmailORUsername(username: string, email: string):
       }
     })) as Model;
     return result.dataValues;
+    return;
   } catch (err) {
     logger.error(err);
   }
@@ -122,7 +124,7 @@ export async function getUserByPasswordToken(token: string): Promise<IAuthDocume
   }
 }
 
-export async function getUserByOTP(otp: string): Promise<IAuthDocument | undefined> {
+export async function getUserByOTP(otp: number): Promise<IAuthDocument | undefined> {
   try {
     const result = (await AuthModel.findOne({
       where: {
@@ -176,7 +178,7 @@ export async function updatePassword(authId: number, password: string): Promise<
 
 export async function updateUserOTP(
   authId: number,
-  otp: string,
+  otp: number,
   otpExpiration: Date,
   browserName: string,
   deviceType: string

@@ -17,7 +17,10 @@ function createConfig(): Config {
     EMAIL_QUEUE_NAME: process.env.EMAIL_QUEUE_NAME!,
     EMAIL_ROUTING_KEY: process.env.EMAIL_ROUTING_KEY!,
     BASE_PATH: process.env.BASE_PATH!,
-    AUTH: process.env.AUTH!
+    AUTH: process.env.AUTH!,
+    CLOUD_NAME: process.env.CLOUD_NAME!,
+    CLOUD_API_KEY: process.env.CLOUD_API_KEY!,
+    CLOUD_API_SECRET: process.env.CLOUD_API_SECRET!
   };
 }
 

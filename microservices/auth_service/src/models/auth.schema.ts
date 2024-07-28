@@ -58,17 +58,17 @@ export const AuthModel: ModelDefined<IAuthDocument, AuthUserCreatingAttributes> 
       allowNull: false
     },
     otp: {
-      type: new DataTypes.STRING(),
+      type: new DataTypes.INTEGER(),
       allowNull: false
     },
     otpExpirationDate: {
       type: new DataTypes.DATE(),
       allowNull: false,
-      defaultValue: Date.now()
+      defaultValue: DataTypes.NOW
     },
     createdAt: {
       type: new DataTypes.DATE(),
-      defaultValue: Date.now()
+      defaultValue: DataTypes.NOW
     },
     passwordResetToken: {
       type: new DataTypes.STRING(),
@@ -77,7 +77,7 @@ export const AuthModel: ModelDefined<IAuthDocument, AuthUserCreatingAttributes> 
     passwordResetExpires: {
       type: new DataTypes.DATE(),
       allowNull: false,
-      defaultValue: Date.now()
+      defaultValue: DataTypes.NOW
     }
   },
   {

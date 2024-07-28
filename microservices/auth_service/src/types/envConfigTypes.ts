@@ -13,4 +13,7 @@ export interface Config {
   EMAIL_ROUTING_KEY: string;
   BASE_PATH: string;
   AUTH: string;
+  CLOUD_NAME: string;
+  CLOUD_API_KEY: string;
+  CLOUD_API_SECRET: string;
 }

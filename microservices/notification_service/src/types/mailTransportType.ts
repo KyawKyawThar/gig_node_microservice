@@ -25,5 +25,5 @@ export interface mailTransport {
   username?: string;
   verifyLink?: string;
   resetLink?: string;
-  otp?: string;
+  otp?: number;
 }

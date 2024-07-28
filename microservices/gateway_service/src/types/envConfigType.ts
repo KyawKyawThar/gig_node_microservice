@@ -9,4 +9,5 @@ export interface Config {
   JWT_SECRET: string;
   SECRET_KEY_ONE: string;
   SECRET_KEY_TWO: string;
+  BASE_PATH: string;
 }
