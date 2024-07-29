@@ -12,6 +12,7 @@ export async function checkConnection(): Promise<void> {
   let isConnected = false;
 
   while (!isConnected) {
+    logger.info('AuthService connecting to ElasticSearch...');
     try {
       const health: ClusterHealthResponse = await elasticSearchClient.cluster.health({});
       logger.info(`Auth Service ElasticSearch health check - ${health.status}`);

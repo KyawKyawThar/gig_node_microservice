@@ -1,39 +1,66 @@
-import { IError, IErrorResponse } from '@auth/types/errorHandlerTypes';
+import { IError } from '@auth/types/errorHandlerTypes';
 import { StatusCodes } from 'http-status-codes';
+export abstract class CustomError extends Error {
+  abstract statusCode: number;
+  abstract status: string;
+  comingFrom: string;
 
-export function createCustomError(statusCode: number, status: string, comingFrom: string, message: string): IErrorResponse {
-  return {
-    statusCode,
-    status,
-    comingFrom,
-    message,
-    serializeError(): IError {
-      return {
-        statusCode,
-        status,
-        comingFrom,
-        message
-      };
-    }
-  };
+  constructor(message: string, comingFrom: string) {
+    super(message);
+    this.comingFrom = comingFrom;
+  }
+
+  serializeError(): IError {
+    return {
+      statusCode: this.statusCode,
+      message: this.message,
+      status: this.status,
+      comingFrom: this.comingFrom
+    };
+  }
 }
 
-export function createBadRequestError(message: string, comingFrom: string): IError {
-  return createCustomError(StatusCodes.BAD_REQUEST, 'Bad Request Error', message, comingFrom);
+export class BadRequestError extends CustomError {
+  statusCode = StatusCodes.BAD_REQUEST;
+  status = 'BadRequestError';
+
+  constructor(message: string, comingFrom: string) {
+    super(message, comingFrom);
+  }
 }
 
-export function createNotFoundError(message: string, comingFrom: string): IError {
-  return createCustomError(StatusCodes.NOT_FOUND, 'Not Found Error', message, comingFrom);
+export class NotFoundError extends CustomError {
+  statusCode = StatusCodes.NOT_FOUND;
+  status = 'NotFoundError';
+
+  constructor(message: string, comingFrom: string) {
+    super(message, comingFrom);
+  }
 }
 
-export function createNotAuthorizedError(message: string, comingFrom: string): IError {
-  return createCustomError(StatusCodes.UNAUTHORIZED, 'Unauthorized Error', message, comingFrom);
+export class NotAuthorizedError extends CustomError {
+  statusCode = StatusCodes.UNAUTHORIZED;
+  status = 'NotAuthorizedError';
+
+  constructor(message: string, comingFrom: string) {
+    super(message, comingFrom);
+  }
 }
 
-export function createServerError(message: string, comingFrom: string): IError {
-  return createCustomError(StatusCodes.INTERNAL_SERVER_ERROR, 'Server Error', message, comingFrom);
+export class ServerError extends CustomError {
+  statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+  status = 'ServerError';
+
+  constructor(message: string, comingFrom: string) {
+    super(message, comingFrom);
+  }
 }
 
-export function createRequestTooLargeError(message: string, comingFrom: string): IError {
-  return createCustomError(StatusCodes.REQUEST_TOO_LONG, 'RequestTooLarge Error', message, comingFrom);
+export class RequestTooLargeError extends CustomError {
+  statusCode = StatusCodes.REQUEST_TOO_LONG;
+  status = 'RequestTooLargeError';
+
+  constructor(message: string, comingFrom: string) {
+    super(message, comingFrom);
+  }
 }

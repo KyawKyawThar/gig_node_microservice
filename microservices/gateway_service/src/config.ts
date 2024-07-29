@@ -11,9 +11,10 @@ function createConfig(): Config {
     CLIENT_BASE_URL: process.env.CLIENT_BASE_URL!,
     AUTH_BASE_URL: process.env.AUTH_BASE_URL!,
     GATEWAY_JWT_TOKEN: process.env.GATEWAY_JWT_TOKEN!,
-    JWT_TOKEN: process.env.JWT_TOKEN!,
+    JWT_SECRET: process.env.JWT_SECRET!,
     SECRET_KEY_ONE: process.env.SECRET_KEY_ONE!,
-    SECRET_KEY_TWO: process.env.SECRET_KEY_TWO!
+    SECRET_KEY_TWO: process.env.SECRET_KEY_TWO!,
+    BASE_PATH: process.env.BASE_PATH!
   };
 }
 

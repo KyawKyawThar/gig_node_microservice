@@ -18,7 +18,7 @@
 - You can update the version of `NodeJS` used inside the `Dockerfile` and `Dockerfile.dev`.
 - Copy contents of `.env.dev` to `.env` file
   - In the `DATABASE_HOST` env variable, use your own ip as its value.
-  - You can generate a new `GATEWAY_JWT_TOKEN` and `JWT_TOKEN`
+  - You can generate a new `GATEWAY_JWT_TOKEN` and `JWT_SECRET`
     - Just note that whatever you generate, that is what you will need to use in all the microservices that require those variables.
 - You can start the service with `npm run dev`.
 

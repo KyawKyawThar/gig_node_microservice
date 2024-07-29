@@ -1,3 +1,5 @@
+import http from 'http';
+
 import { Logger } from 'winston';
 import { winstonLogger } from '@auth/logger';
 import { config } from '@auth/config';
@@ -12,8 +14,14 @@ import hpp from 'hpp';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
+import { createConnection } from '@auth/queues/connection';
+import { Channel } from 'amqplib';
 
-const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'authDatabaseServer', 'debug');
+import { CustomError } from './errorHandler';
+
+const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'authServer', 'debug');
+
+export let authChannel: Channel;
 
 export function start(app: Application) {
   applyMiddleware(app);
@@ -21,7 +29,8 @@ export function start(app: Application) {
   routeMiddleware(app);
   startQueue();
   startElasticSearch();
-  errorHandler(app);
+  authErrorHandler(app);
+  startServer(app);
 }
 
 function applyMiddleware(app: Application): void {
@@ -48,10 +57,9 @@ function applyMiddleware(app: Application): void {
   app.use(limiter);
 
   app.use(async (req: Request, _res: Response, next: NextFunction) => {
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    if (req.headers?.authorization && req.headers.authorization.startsWith('Bearer')) {
       const token = req.headers.authorization.split(' ')[1];
-
-      const payload = verify(token, config.JWT_TOKEN) as IAuthPayload;
+      const payload = verify(token, config.JWT_SECRET) as IAuthPayload;
       req.currentUser = payload;
     }
     next();
@@ -68,23 +76,34 @@ function routeMiddleware(app: Application): void {
   appRoutes(app);
 }
 
-async function startQueue(): Promise<void> {}
+async function startQueue(): Promise<void> {
+  authChannel = (await createConnection()) as Channel;
+}
 
 function startElasticSearch(): void {
   checkConnection();
 }
 
-function errorHandler(app: Application): void {
-  app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.log('err', `Auth service ${err.comingFrom}`, err);
-
-    // Check if the error has a serializeError method, indicating it's a custom error
-    if (typeof err.serializeError === 'function') {
-      res.status(err.statusCode).json(err.serializeError());
-    } else {
-      // Handle non-custom errors or propagate to the next middleware
-      res.status(500).json({ message: 'An unexpected error occurred' });
+function authErrorHandler(app: Application): void {
+  app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
+    logger.log('error', `Auth service ${error.comingFrom}`, error.serializeError());
+    if (error instanceof CustomError) {
+      return res.status(error.statusCode).json(error.serializeError());
     }
     next();
   });
+}
+
+function startServer(app: Application): void {
+  try {
+    logger.info(`Authentication server has started with process id ${process.pid}`);
+
+    const server = new http.Server(app);
+
+    server.listen(config.AUTH_SERVER_PORT, () => {
+      logger.info(`Authentication server running on port ${config.AUTH_SERVER_PORT}`);
+    });
+  } catch (err) {
+    logger.log('error', 'Auth service startHTTPServer() method error: ', err);
+  }
 }

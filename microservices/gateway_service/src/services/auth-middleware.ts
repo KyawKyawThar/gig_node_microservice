@@ -18,7 +18,7 @@ class AuthMiddleware {
     }
 
     try {
-      const payload: IAuthPayload = verify(req.session?.jwt, `${config.JWT_TOKEN}`) as IAuthPayload;
+      const payload: IAuthPayload = verify(req.session?.jwt, `${config.JWT_SECRET}`) as IAuthPayload;
       req.currentUser = payload;
     } catch (e) {
       throw new NotAuthorizedError('Token is not available! Please log in to get access.', 'Gateway service verifyUser() method');
