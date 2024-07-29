@@ -33,7 +33,7 @@ export interface IAuthDocument {
   emailVerificationToken?: string;
   browserName?: string;
   deviceType?: string;
-  otp?: number;
+  otp?: string;
   otpExpiration?: Date;
   createdAt?: Date;
   updatedAt?: Date;
@@ -56,5 +56,5 @@ export interface IEmailMessageDetails {
   verifyLink?: string;
   resetLink?: string;
   username?: string;
-  otp?: number;
+  otp?: string;
 }

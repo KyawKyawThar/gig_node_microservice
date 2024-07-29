@@ -4,5 +4,5 @@ export interface IEmailMessageDetails {
   verifyLink?: string;
   resetLink?: string;
   username?: string;
-  otp?: number;
+  otp?: string;
 }

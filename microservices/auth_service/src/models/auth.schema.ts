@@ -58,8 +58,8 @@ export const AuthModel: ModelDefined<IAuthDocument, AuthUserCreatingAttributes> 
       allowNull: false
     },
     otp: {
-      type: new DataTypes.INTEGER(),
-      allowNull: false
+      type: new DataTypes.STRING(),
+      allowNull: true
     },
     otpExpirationDate: {
       type: new DataTypes.DATE(),
@@ -90,9 +90,12 @@ export const AuthModel: ModelDefined<IAuthDocument, AuthUserCreatingAttributes> 
 ) as ModelDefined<IAuthDocument, AuthUserCreatingAttributes> & AuthModelInstanceMethods;
 
 AuthModel.addHook('beforeCreate', async (auth: Model) => {
-  const hashedPassword = await bcrypt.hash(auth.dataValues.password, config.SALT_HASH);
-
-  auth.dataValues.password = hashedPassword;
+  try {
+    const hashedPassword = await bcrypt.hash(auth.dataValues.password, Number(config.SALT_HASH));
+    auth.dataValues.password = hashedPassword;
+  } catch (error) {
+    return Promise.reject(error);
+  }
 });
 
 //add a method to model

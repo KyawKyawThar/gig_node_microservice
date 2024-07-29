@@ -6,10 +6,10 @@ import { authChannel } from '@auth/server';
 import { IAuthBuyerMessageDetails, IAuthDocument } from '@auth/types/authTypes';
 import { sign } from 'jsonwebtoken';
 import { omit, toLower } from 'lodash';
-import { Model, Op } from 'sequelize';
+import { Model, Op, DatabaseError } from 'sequelize';
 import { Logger } from 'winston';
 
-const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'authServiceElasticSearchServer', 'debug');
+const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth Service ', 'debug');
 
 export function firstLetterUpperCase(input: string): string {
   if (!input) {
@@ -21,7 +21,6 @@ export function firstLetterUpperCase(input: string): string {
 
 export async function createUser(data: IAuthDocument): Promise<IAuthDocument | undefined> {
   try {
-    logger.info('Creating user func called....');
     const result = await AuthModel.create(data);
 
     const buyerMessageDetail: IAuthBuyerMessageDetails = {
@@ -43,8 +42,14 @@ export async function createUser(data: IAuthDocument): Promise<IAuthDocument | u
     const userData: IAuthDocument = omit(result.dataValues, ['password']);
 
     return userData;
-  } catch (err) {
-    logger.error(err);
+  } catch (error) {
+    if (error instanceof DatabaseError) {
+      logger.error('SQL Error Message:', error.original);
+    } else if (error instanceof Error) {
+      logger.error('Error creating user:', error.message);
+    } else {
+      logger.error('An unknown error occurred:', error);
+    }
   }
 }
 export async function getUserByID(authId: number): Promise<IAuthDocument | undefined> {
@@ -92,8 +97,7 @@ export async function getUserByEmailORUsername(username: string, email: string):
         [Op.or]: [{ username: firstLetterUpperCase(username) }, { email: toLower(email) }]
       }
     })) as Model;
-    return result.dataValues;
-    return;
+    return result?.dataValues;
   } catch (err) {
     logger.error(err);
   }
@@ -124,7 +128,7 @@ export async function getUserByPasswordToken(token: string): Promise<IAuthDocume
   }
 }
 
-export async function getUserByOTP(otp: number): Promise<IAuthDocument | undefined> {
+export async function getUserByOTP(otp: string): Promise<IAuthDocument | undefined> {
   try {
     const result = (await AuthModel.findOne({
       where: {
@@ -178,7 +182,7 @@ export async function updatePassword(authId: number, password: string): Promise<
 
 export async function updateUserOTP(
   authId: number,
-  otp: number,
+  otp: string,
   otpExpiration: Date,
   browserName: string,
   deviceType: string

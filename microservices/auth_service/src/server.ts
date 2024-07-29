@@ -17,6 +17,8 @@ import compression from 'compression';
 import { createConnection } from '@auth/queues/connection';
 import { Channel } from 'amqplib';
 
+import { CustomError } from './errorHandler';
+
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'authServer', 'debug');
 
 export let authChannel: Channel;
@@ -55,9 +57,8 @@ function applyMiddleware(app: Application): void {
   app.use(limiter);
 
   app.use(async (req: Request, _res: Response, next: NextFunction) => {
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    if (req.headers?.authorization && req.headers.authorization.startsWith('Bearer')) {
       const token = req.headers.authorization.split(' ')[1];
-
       const payload = verify(token, config.JWT_SECRET) as IAuthPayload;
       req.currentUser = payload;
     }
@@ -84,15 +85,10 @@ function startElasticSearch(): void {
 }
 
 function authErrorHandler(app: Application): void {
-  app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.log('error', `Auth service ${err.comingFrom}`, err);
-
-    // Check if the error has a serializeError method, indicating it's a custom error
-    if (typeof err.serializeError === 'function') {
-      res.status(err.statusCode).json(err.serializeError());
-    } else {
-      // Handle non-custom errors or propagate to the next middleware
-      res.status(500).json({ message: 'An unexpected error occurred' });
+  app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
+    logger.log('error', `Auth service ${error.comingFrom}`, error.serializeError());
+    if (error instanceof CustomError) {
+      return res.status(error.statusCode).json(error.serializeError());
     }
     next();
   });

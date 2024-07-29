@@ -7,6 +7,7 @@ export interface Config {
   ELASTIC_SEARCH_URL: string;
   DB_SOURCE: string;
   JWT_SECRET: string;
+  GATEWAY_JWT_TOKEN: string;
   SALT_HASH: string;
   EMAIL_EXCHANGE_NAME: string;
   EMAIL_QUEUE_NAME: string;

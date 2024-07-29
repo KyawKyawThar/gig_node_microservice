@@ -13,6 +13,16 @@ class AuthService {
     AxiosAuthInstance = this.axiosService.kkt;
   }
 
+  async signUp(body: IAuth): Promise<AxiosResponse> {
+    const response = await this.axiosService.kkt.post('/sign-up', body);
+    return response;
+  }
+
+  async signIn(body: IAuth): Promise<AxiosResponse> {
+    const response = await this.axiosService.kkt.post('/sign-in', body);
+    return response;
+  }
+
   async getCurrentUser(): Promise<AxiosResponse> {
     const response: AxiosResponse = await AxiosAuthInstance.get('/current-user');
     return response;
@@ -40,16 +50,6 @@ class AuthService {
 
   async resendEmail(body: { accountID: number; email: string }): Promise<AxiosResponse> {
     const response: AxiosResponse = await AxiosAuthInstance.post('/resend-email', body);
-    return response;
-  }
-
-  async signUp(body: IAuth): Promise<AxiosResponse> {
-    const response = await this.axiosService.kkt.post('/sign-up', body);
-    return response;
-  }
-
-  async signIn(body: IAuth): Promise<AxiosResponse> {
-    const response = await this.axiosService.kkt.post('/sign-in', body);
     return response;
   }
 

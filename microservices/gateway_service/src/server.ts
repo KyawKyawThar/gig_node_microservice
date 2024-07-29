@@ -2,7 +2,7 @@ import http from 'http';
 
 import { Application, json, urlencoded, Request, Response, NextFunction } from 'express';
 import { Logger } from 'winston';
-import { HttpStatusCode } from 'axios';
+import { HttpStatusCode, isAxiosError } from 'axios';
 import { winstonLogger } from '@gateway/logger';
 import { IErrorResponse } from '@gateway/types/errorHandlerTypes';
 import { CustomError } from '@gateway/errorHandler';
@@ -55,7 +55,7 @@ export class GateWayService {
     );
 
     app.use((req: Request, _res: Response, next: NextFunction) => {
-      if (!req.session?.jwt) {
+      if (req.session?.jwt) {
         AxiosAuthInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
       }
       next();
@@ -89,12 +89,17 @@ export class GateWayService {
     });
 
     app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-      logger.log('error', `Gateway service ${err.comingFrom}`, err);
+      //logger.log('error', `Gateway service ${err.comingFrom}`, err);
 
       if (err instanceof CustomError) {
+        logger.log('error', `GatewayService ${err.comingFrom}:`, err);
         res.status(err.statusCode).json(err.serializeError());
-      } else {
-        res.status(500).json({ message: 'An unexpected error occurred' });
+      }
+      if (isAxiosError(err)) {
+        // console.log('code is running in here', err?.response?.data);
+        logger.log('error', `GatewayService Axios Error - ${err?.response?.data?.comingFrom}:`, err?.response?.data);
+
+        res.status(err?.response?.data?.statusCode ?? 500).json({ message: err?.response?.data?.message ?? 'Error occurred.' });
       }
       next();
     });

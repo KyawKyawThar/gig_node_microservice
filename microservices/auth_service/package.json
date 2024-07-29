@@ -21,6 +21,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "^8.14.0",
     "@types/bcrypt": "^5.0.2",
+    "@types/sequelize": "^4.28.20",
     "amqplib": "^0.10.4",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.3.1",
