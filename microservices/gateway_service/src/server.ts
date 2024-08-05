@@ -121,6 +121,9 @@ export class GateWayService {
       httpServer.listen(config.GATEWAY_SERVER_PORT, () => {
         logger.info(`Gateway service is running on port: ${config.GATEWAY_SERVER_PORT}`);
       });
+      process.once('uncaughtException', (err) => {
+        logger.log('error', 'Unhandled error:', err);
+      });
     } catch (err) {
       logger.log('error', 'Gateway service startHTTPServer() method error: ', err);
     }

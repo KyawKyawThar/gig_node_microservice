@@ -1,18 +1,16 @@
 import { config } from '@gateway/config';
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { sign } from 'jsonwebtoken';
 
 export class AxiosService {
-  public kkt: ReturnType<typeof axios.create>;
+  // public kkt: ReturnType<typeof axios.create>;
+  public kkt: AxiosInstance;
 
   constructor(baseURL: string, serviceName?: string) {
     this.kkt = this.axiosCreateInstance(baseURL, serviceName);
   }
-  public axiosCreateInstance(baseURL: string, serviceName?: string): ReturnType<typeof axios.create> {
-    let requestGatewayToken = '';
-    if (serviceName) {
-      requestGatewayToken = sign({ id: serviceName }, `${config.GATEWAY_JWT_TOKEN}`);
-    }
+  public axiosCreateInstance(baseURL: string, serviceName?: string): AxiosInstance {
+    const requestGatewayToken = serviceName ? sign({ id: serviceName }, `${config.GATEWAY_JWT_TOKEN}`) : '';
 
     const instance: ReturnType<typeof axios.create> = axios.create({
       baseURL,

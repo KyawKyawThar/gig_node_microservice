@@ -1,3 +1,7 @@
+// This code snippet is a TypeScript declaration
+//that extends the Express namespace to include additional
+//properties on the Request object
+
 declare global {
   namespace Express {
     interface Request {
@@ -34,7 +38,7 @@ export interface IAuthDocument {
   browserName?: string;
   deviceType?: string;
   otp?: string;
-  otpExpiration?: Date;
+  otpExpirationDate?: Date;
   createdAt?: Date;
   updatedAt?: Date;
   passwordResetToken?: string;
