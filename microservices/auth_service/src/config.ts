@@ -14,7 +14,7 @@ function createConfig(): Config {
     JWT_SECRET: process.env.JWT_SECRET!,
     GATEWAY_JWT_TOKEN: process.env.GATEWAY_JWT_TOKEN!,
     SALT_HASH: process.env.SALT_HASH!,
-    EMAIL_EXCHANGE_NAME: process.env.EEMAIL_EXCHANGE_NAME!,
+    EMAIL_EXCHANGE_NAME: process.env.EMAIL_EXCHANGE_NAME!,
     EMAIL_QUEUE_NAME: process.env.EMAIL_QUEUE_NAME!,
     EMAIL_ROUTING_KEY: process.env.EMAIL_ROUTING_KEY!,
     BASE_PATH: process.env.BASE_PATH!,

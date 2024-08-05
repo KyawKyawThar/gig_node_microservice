@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
 import { upload } from '@auth/cloudinaryUpload';
-import { BadRequestError } from '@auth/errorHandler';
+import { BadRequestError, ServerError } from '@auth/errorHandler';
 import { signupSchema } from '@auth/schemes/signup';
 import { createUser, firstLetterUpperCase, getUserByEmailORUsername, signToken } from '@auth/services/auth.service';
 import { IAuthDocument, IEmailMessageDetails } from '@auth/types/authTypes';
@@ -11,9 +11,12 @@ import { StatusCodes } from 'http-status-codes';
 import { publicDirectMessage } from '@auth/queues/auth.producer';
 import { authChannel } from '@auth/server';
 import { config } from '@auth/config';
-import { upperCase } from 'lodash';
 import { NextFunction, Request, Response } from 'express';
+import { Logger } from 'winston';
+import { winstonLogger } from '@auth/logger';
+import { DatabaseError } from 'sequelize';
 
+const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth-server', 'debug');
 export async function signUp(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { error } = signupSchema.validate(req.body);
@@ -22,7 +25,14 @@ export async function signUp(req: Request, res: Response, next: NextFunction): P
     }
     const { username, email, password, country, profilePicture, browserName, deviceType } = req.body;
 
-    const checkIfUserExists = await getUserByEmailORUsername(username, email);
+    const user = await getUserByEmailORUsername(username, email);
+
+    if (user instanceof DatabaseError) {
+      logger.error('SQL Error Message:', user.original.message);
+      throw new ServerError(user.original.message, 'auth-service verifyOTP method() error');
+    }
+
+    const checkIfUserExists = user as IAuthDocument;
     if (checkIfUserExists) {
       throw new BadRequestError('Invalid Credentials Email or Username', 'Signup getUserByEmailORUsername() method error');
     }
@@ -36,12 +46,12 @@ export async function signUp(req: Request, res: Response, next: NextFunction): P
         'Signup uploadResult() method error'
       );
     }
-    const randomByte = await Promise.resolve(crypto.randomBytes(20));
+    const randomByte = crypto.randomBytes(20);
     const randomCharacter = randomByte.toString('hex');
 
     const data: IAuthDocument = {
       username: firstLetterUpperCase(username),
-      email: upperCase(email),
+      email: email.toLowerCase(),
       password,
       country,
       profilePublicId,
@@ -51,7 +61,14 @@ export async function signUp(req: Request, res: Response, next: NextFunction): P
       emailVerificationToken: randomCharacter
     } as IAuthDocument;
 
-    const result = await createUser(data);
+    const newUser = await createUser(data);
+
+    if (newUser instanceof DatabaseError) {
+      logger.error('SQL Error Message:', newUser.original.message);
+      throw new ServerError(newUser.original.message, 'auth-service verifyOTP method() error');
+    }
+
+    const result = newUser as IAuthDocument;
 
     const verifyEmailLink = `${config.CLIENT_URL}/confirm_email?v_token=${randomCharacter}`;
     const messageDetail: IEmailMessageDetails = {
@@ -69,6 +86,7 @@ export async function signUp(req: Request, res: Response, next: NextFunction): P
     if (result) {
       const userJWT = signToken(result.id!, result.username!, result.email!);
       res.status(StatusCodes.OK).json({ message: 'User created successfully', user: result, token: userJWT });
+      logger.info('User created successfully....');
     }
   } catch (error) {
     next(error);

@@ -17,6 +17,7 @@ class ElasticSearch {
     while (!isConnected) {
       try {
         const health = await this.elasticSearchClient.cluster.health({});
+
         logger.info(`Gateway Service ElasticSearch health check - ${health.status}`);
         isConnected = true;
       } catch (err) {

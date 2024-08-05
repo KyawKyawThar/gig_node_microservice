@@ -19,7 +19,7 @@ export function firstLetterUpperCase(input: string): string {
   return input.charAt(0).toUpperCase() + input.slice(1);
 }
 
-export async function createUser(data: IAuthDocument): Promise<IAuthDocument | undefined> {
+export async function createUser(data: IAuthDocument): Promise<IAuthDocument | DatabaseError | undefined> {
   try {
     const result = await AuthModel.create(data);
 
@@ -45,14 +45,11 @@ export async function createUser(data: IAuthDocument): Promise<IAuthDocument | u
   } catch (error) {
     if (error instanceof DatabaseError) {
       logger.error('SQL Error Message:', error.original);
-    } else if (error instanceof Error) {
-      logger.error('Error creating user:', error.message);
-    } else {
-      logger.error('An unknown error occurred:', error);
+      return error;
     }
   }
 }
-export async function getUserByID(authId: number): Promise<IAuthDocument | undefined> {
+export async function getUserByID(authId: number): Promise<IAuthDocument | DatabaseError | undefined> {
   try {
     const result = (await AuthModel.findOne({
       where: { id: authId },
@@ -61,12 +58,14 @@ export async function getUserByID(authId: number): Promise<IAuthDocument | undef
       }
     })) as Model;
     return result.dataValues;
-  } catch (err) {
-    logger.error(err);
+  } catch (error) {
+    if (error instanceof DatabaseError) {
+      return error;
+    }
   }
 }
 
-export async function getUserByEmail(email: string): Promise<IAuthDocument | undefined> {
+export async function getUserByEmail(email: string): Promise<IAuthDocument | DatabaseError | undefined> {
   try {
     const result = (await AuthModel.findOne({
       where: {
@@ -74,23 +73,27 @@ export async function getUserByEmail(email: string): Promise<IAuthDocument | und
       }
     })) as Model;
     return result.dataValues;
-  } catch (err) {
-    logger.error(err);
+  } catch (error) {
+    if (error instanceof DatabaseError) {
+      return error;
+    }
   }
 }
 
-export async function getUserByUsername(username: string): Promise<IAuthDocument | undefined> {
+export async function getUserByUsername(username: string): Promise<IAuthDocument | DatabaseError | undefined> {
   try {
     const result = (await AuthModel.findOne({
       where: { username: firstLetterUpperCase(username) }
     })) as Model;
     return result.dataValues;
-  } catch (err) {
-    logger.error(err);
+  } catch (error) {
+    if (error instanceof DatabaseError) {
+      return error;
+    }
   }
 }
 
-export async function getUserByEmailORUsername(username: string, email: string): Promise<IAuthDocument | undefined> {
+export async function getUserByEmailORUsername(username: string, email: string): Promise<IAuthDocument | DatabaseError | undefined> {
   try {
     const result = (await AuthModel.findOne({
       where: {
@@ -98,24 +101,44 @@ export async function getUserByEmailORUsername(username: string, email: string):
       }
     })) as Model;
     return result?.dataValues;
-  } catch (err) {
-    logger.error(err);
+  } catch (error) {
+    if (error instanceof DatabaseError) {
+      return error;
+    }
   }
 }
 
-export async function getUserByEmailVerifyToken(token: string): Promise<IAuthDocument | undefined> {
+export async function getUserByEmailVerifyToken(token: string): Promise<IAuthDocument | DatabaseError | undefined> {
   try {
     const result = (await AuthModel.findOne({
       where: { emailVerificationToken: token }
     })) as Model;
 
     return result.dataValues;
-  } catch (err) {
-    logger.error(err);
+  } catch (error) {
+    if (error instanceof DatabaseError) {
+      return error;
+    }
   }
 }
 
-export async function getUserByPasswordToken(token: string): Promise<IAuthDocument | undefined> {
+export async function updateVerifyEmail(
+  authId: number,
+  emailVerified: number,
+  emailVerificationToken?: string
+): Promise<DatabaseError | void> {
+  try {
+    await AuthModel.update(!emailVerificationToken ? { emailVerified } : { emailVerified, emailVerificationToken }, {
+      where: { id: authId }
+    });
+  } catch (error) {
+    if (error instanceof DatabaseError) {
+      return error;
+    }
+  }
+}
+
+export async function getUserByPasswordToken(token: string): Promise<IAuthDocument | DatabaseError | undefined> {
   try {
     const result = (await AuthModel.findOne({
       where: {
@@ -123,35 +146,14 @@ export async function getUserByPasswordToken(token: string): Promise<IAuthDocume
       }
     })) as Model;
     return result.dataValues;
-  } catch (err) {
-    logger.error(err);
+  } catch (error) {
+    if (error instanceof DatabaseError) {
+      return error;
+    }
   }
 }
 
-export async function getUserByOTP(otp: string): Promise<IAuthDocument | undefined> {
-  try {
-    const result = (await AuthModel.findOne({
-      where: {
-        [Op.and]: [{ otpExpiration: { [Op.gt]: Date.now() } }, { otp }]
-      }
-    })) as Model;
-    return result.dataValues;
-  } catch (err) {
-    logger.error(err);
-  }
-}
-
-export async function updateVerifyEmail(authId: number, emailVerified: number, emailVerificationToken: number): Promise<void> {
-  try {
-    await AuthModel.update(!emailVerificationToken ? { emailVerified } : { emailVerified, emailVerificationToken }, {
-      where: { id: authId }
-    });
-  } catch (err) {
-    logger.error(err);
-  }
-}
-
-export async function updatePasswordToken(authId: number, token: string, tokenExpiration: Date): Promise<void> {
+export async function updatePasswordToken(authId: number, token: string, tokenExpiration: Date): Promise<DatabaseError | void> {
   try {
     await AuthModel.update(
       {
@@ -161,11 +163,13 @@ export async function updatePasswordToken(authId: number, token: string, tokenEx
       { where: { id: authId } }
     );
   } catch (error) {
-    logger.error(error);
+    if (error instanceof DatabaseError) {
+      return error;
+    }
   }
 }
 
-export async function updatePassword(authId: number, password: string): Promise<void> {
+export async function updatePassword(authId: number, password: string): Promise<DatabaseError | void> {
   try {
     await AuthModel.update(
       {
@@ -176,29 +180,48 @@ export async function updatePassword(authId: number, password: string): Promise<
       { where: { id: authId } }
     );
   } catch (error) {
-    logger.error(error);
+    logger.info(error);
+    if (error instanceof DatabaseError) {
+      return error;
+    }
   }
 }
 
+export async function getUserByOTP(otp: string): Promise<IAuthDocument | DatabaseError | undefined> {
+  try {
+    const result = (await AuthModel.findOne({
+      where: {
+        [Op.and]: [{ otpExpirationDate: { [Op.gt]: new Date() } }, { otp }]
+      }
+    })) as Model;
+    return result.dataValues;
+  } catch (error) {
+    if (error instanceof DatabaseError) {
+      return error;
+    }
+  }
+}
 export async function updateUserOTP(
   authId: number,
   otp: string,
-  otpExpiration: Date,
+  otpExpirationDate: Date,
   browserName: string,
   deviceType: string
-): Promise<void> {
+): Promise<DatabaseError | void> {
   try {
     await AuthModel.update(
       {
         otp,
-        otpExpiration,
+        otpExpirationDate,
         ...(browserName.length > 0 && { browserName }),
         ...(deviceType.length > 0 && { deviceType })
       },
       { where: { id: authId } }
     );
   } catch (error) {
-    logger.error(error);
+    if (error instanceof DatabaseError) {
+      return error;
+    }
   }
 }
 

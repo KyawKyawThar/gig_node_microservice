@@ -18,7 +18,7 @@ export async function publicDirectMessage(
       channel = (await createConnection()) as Channel;
     }
 
-    channel.assertExchange(exchangeName, 'direct');
+    await channel.assertExchange(exchangeName, 'direct');
     channel.publish(exchangeName, routingKey, Buffer.from(message));
     logger.info(logMessage);
   } catch (err) {

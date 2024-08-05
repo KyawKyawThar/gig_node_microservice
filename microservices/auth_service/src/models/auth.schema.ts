@@ -103,7 +103,9 @@ AuthModel.prototype.comparePassword = async function comparePassword(password: s
   return compare(password, hashedPassword);
 };
 AuthModel.prototype.hashPassword = async function hashPassword(password: string) {
-  return bcrypt.hash(password, config.SALT_HASH);
+  const hashPassword = await bcrypt.hash(password, Number(config.SALT_HASH));
+
+  return hashPassword;
 };
 // force: true always deletes the table when there is a server restart
 AuthModel.sync({});

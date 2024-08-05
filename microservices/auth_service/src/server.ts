@@ -86,9 +86,9 @@ function startElasticSearch(): void {
 
 function authErrorHandler(app: Application): void {
   app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.log('error', `Auth service ${error.comingFrom}`, error.serializeError());
+    logger.log('error', `Auth service ${error.comingFrom}`, error?.serializeError());
     if (error instanceof CustomError) {
-      return res.status(error.statusCode).json(error.serializeError());
+      return res.status(error.statusCode).json(error?.serializeError());
     }
     next();
   });
@@ -102,6 +102,10 @@ function startServer(app: Application): void {
 
     server.listen(config.AUTH_SERVER_PORT, () => {
       logger.info(`Authentication server running on port ${config.AUTH_SERVER_PORT}`);
+    });
+
+    process.once('uncaughtException', (err) => {
+      logger.log('error', 'Unhandled error:', err);
     });
   } catch (err) {
     logger.log('error', 'Auth service startHTTPServer() method error: ', err);
