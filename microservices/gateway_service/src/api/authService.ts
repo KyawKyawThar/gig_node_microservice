@@ -60,8 +60,14 @@ class AuthService {
     const response = await this.axiosService.kkt.post(`/reset-password/${token}`, body);
     return response;
   }
-  async seed(count: number): Promise<AxiosResponse> {
-    const response = await this.axiosService.kkt.put(`/seed/:${count}`);
+
+  async gigById(gigId: string): Promise<AxiosResponse> {
+    const response = await this.axiosService.kkt.get(`search/gig/${gigId}`);
+    return response;
+  }
+
+  async gigs(from: string, size: string, type: string, query: string): Promise<AxiosResponse> {
+    const response = await this.axiosService.kkt.get(`search/gigs/${from}/${size}/${type}?${query}`);
     return response;
   }
 }

@@ -2,6 +2,21 @@ import { Config } from '@auth/types/envConfigTypes';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+if (process.env.ENABLE_AMP === '1') {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('elastic-apm-node').start({
+    serviceName: 'auth_service',
+    serverURL: process.env.ELASTIC_APM_SERVER_URL,
+    secretToken: process.env.ELASTIC_APM_SECRET_TOKEN,
+    environment: process.env.NODE_ENV,
+    active: true,
+    captureBody: 'all',
+    errorOnAbortedRequests: true,
+    captureErrorLogStackTraces: true
+  });
+}
+
 function createConfig(): Config {
   return {
     AUTH_SERVER_PORT: process.env.AUTH_SERVER_PORT!,

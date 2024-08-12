@@ -3,11 +3,11 @@ import { randomInt } from 'crypto';
 import { config } from '@auth/config';
 import { BadRequestError, NotAuthorizedError, ServerError } from '@auth/errorHandler';
 import { AuthModel } from '@auth/models/auth.schema';
-import { publicDirectMessage } from '@auth/queues/auth.producer';
+//import { publicDirectMessage } from '@auth/queues/auth.producer';
 import { signInSchema } from '@auth/schemes/signin';
-import { authChannel } from '@auth/server';
+// import { authChannel } from '@auth/server';
 import { getUserByEmail, getUserByUsername, signToken, updateUserOTP } from '@auth/services/auth.service';
-import { IAuthDocument, IEmailMessageDetails } from '@auth/types/authTypes';
+import { IAuthDocument } from '@auth/types/authTypes';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { omit } from 'lodash';
@@ -48,7 +48,7 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
     if (existingUser.password) {
       const isMatchPassword: boolean = await AuthModel.prototype.comparePassword(password, existingUser.password!);
       if (!isMatchPassword) {
-        throw new NotAuthorizedError('Passwords do not match', 'auth-service signIn method() error');
+        throw new NotAuthorizedError('Username or Passwords do not match', 'auth-service signIn method() error');
       }
     }
     let userJWT: string = '';
@@ -61,20 +61,20 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
       // min 6 digits and max 6 digits
       // 100000 - 999999
       const otpCode = randomInt(10 ** 5, 10 ** 6 - 1);
-      const OTPMessageDetail: IEmailMessageDetails = {
-        username: existingUser.username,
-        receiverEmail: existingUser.email,
-        otp: `${otpCode}`,
-        template: 'otpEmail'
-      };
+      // const OTPMessageDetail: IEmailMessageDetails = {
+      //   username: existingUser.username,
+      //   receiverEmail: existingUser.email,
+      //   otp: `${otpCode}`,
+      //   template: 'otpEmail'
+      // };
 
-      await publicDirectMessage(
-        authChannel,
-        config.EMAIL_EXCHANGE_NAME,
-        config.EMAIL_ROUTING_KEY,
-        JSON.stringify(OTPMessageDetail),
-        'OTP email message sent to notification service.'
-      );
+      // await publicDirectMessage(
+      //   authChannel,
+      //   config.EMAIL_EXCHANGE_NAME,
+      //   config.EMAIL_ROUTING_KEY,
+      //   JSON.stringify(OTPMessageDetail),
+      //   'OTP email message sent to notification service.'
+      // );
       message = 'OTP code sent';
       const otpExpirationDate = new Date();
       otpExpirationDate.setMinutes(otpExpirationDate.getMinutes() + 10);

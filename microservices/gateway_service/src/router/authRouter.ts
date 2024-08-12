@@ -1,5 +1,5 @@
 import { password } from '@gateway/controller/auth/passport';
-import { authSeed } from '@gateway/controller/auth/seed';
+
 import { signIn } from '@gateway/controller/auth/signin';
 import { signOut } from '@gateway/controller/auth/signout';
 import { signUp } from '@gateway/controller/auth/signup';
@@ -23,7 +23,6 @@ class AuthRoute {
     this.router.put('/auth/forget-password', password.forgetPassword);
     this.router.post('/auth/reset-password/:token', password.resetPassword);
     this.router.put('/auth/change-password', password.changePassword);
-    this.router.put('/auth/seed/:count', authSeed.create);
 
     return this.router;
   }

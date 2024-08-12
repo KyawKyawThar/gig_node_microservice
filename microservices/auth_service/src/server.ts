@@ -7,7 +7,7 @@ import { Application, NextFunction, Request, Response, json, urlencoded } from '
 import { verify } from 'jsonwebtoken';
 import { IAuthPayload } from '@auth/types/authTypes';
 import { IErrorResponse } from '@auth/types/errorHandlerTypes';
-import { checkConnection } from '@auth/elasticSearch';
+import { checkConnection, createIndex } from '@auth/elasticSearch';
 import { appRoutes } from '@auth/routes';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
@@ -80,8 +80,9 @@ async function startQueue(): Promise<void> {
   authChannel = (await createConnection()) as Channel;
 }
 
-function startElasticSearch(): void {
-  checkConnection();
+async function startElasticSearch(): Promise<void> {
+  await checkConnection();
+  await createIndex('gigs');
 }
 
 function authErrorHandler(app: Application): void {
