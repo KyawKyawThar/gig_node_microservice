@@ -4,12 +4,12 @@ import { upload } from '@auth/cloudinaryUpload';
 import { BadRequestError, ServerError } from '@auth/errorHandler';
 import { signupSchema } from '@auth/schemes/signup';
 import { createUser, firstLetterUpperCase, getUserByEmailORUsername, signToken } from '@auth/services/auth.service';
-import { IAuthDocument, IEmailMessageDetails } from '@auth/types/authTypes';
+import { IAuthDocument } from '@auth/types/authTypes';
 import { UploadApiResponse } from 'cloudinary';
 import { v4 as uuidv4 } from 'uuid';
 import { StatusCodes } from 'http-status-codes';
-import { publicDirectMessage } from '@auth/queues/auth.producer';
-import { authChannel } from '@auth/server';
+// import { publicDirectMessage } from '@auth/queues/auth.producer';
+// import { authChannel } from '@auth/server';
 import { config } from '@auth/config';
 import { NextFunction, Request, Response } from 'express';
 import { Logger } from 'winston';
@@ -70,19 +70,19 @@ export async function signUp(req: Request, res: Response, next: NextFunction): P
 
     const result = newUser as IAuthDocument;
 
-    const verifyEmailLink = `${config.CLIENT_URL}/confirm_email?v_token=${randomCharacter}`;
-    const messageDetail: IEmailMessageDetails = {
-      receiverEmail: result?.email,
-      template: 'verifyEmail',
-      verifyLink: verifyEmailLink
-    };
-    await publicDirectMessage(
-      authChannel,
-      config.EMAIL_EXCHANGE_NAME,
-      config.EMAIL_ROUTING_KEY,
-      JSON.stringify(messageDetail),
-      'Verify email message has been sent to notification service.'
-    );
+    //const verifyEmailLink = `${config.CLIENT_URL}/confirm_email?v_token=${randomCharacter}`;
+    // const messageDetail: IEmailMessageDetails = {
+    //   receiverEmail: result?.email,
+    //   template: 'verifyEmail',
+    //   verifyLink: verifyEmailLink
+    // };
+    // await publicDirectMessage(
+    //   authChannel,
+    //   config.EMAIL_EXCHANGE_NAME,
+    //   config.EMAIL_ROUTING_KEY,
+    //   JSON.stringify(messageDetail),
+    //   'Verify email message has been sent to notification service.'
+    // );
     if (result) {
       const userJWT = signToken(result.id!, result.username!, result.email!);
       res.status(StatusCodes.OK).json({ message: 'User created successfully', user: result, token: userJWT });
