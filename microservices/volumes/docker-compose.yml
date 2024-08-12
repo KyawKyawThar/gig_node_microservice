@@ -97,7 +97,6 @@ services:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USERNAME}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
 
-
   heartbeat:
     container_name: heartbeat_container
     image:  docker.elastic.co/beats/heartbeat:8.15.0
