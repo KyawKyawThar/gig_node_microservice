@@ -24,12 +24,10 @@ export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
 
     await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
       //consume the message
-
       //msg is coming from connection.publish from server.ts
-      // console.log(JSON.parse(msg!.content.toString()));
+
       if (msg) {
         const { receiverEmail, username, verifyLink, resetLink, template, otp } = JSON.parse(msg!.content.toString());
-
         const mailTransport: mailTransport = {
           appLink: `${config.CLIENT_URL}`,
           appIcon: `${config.APP_ICON}`,
@@ -94,7 +92,8 @@ export async function consumeOrderEmailMessage(channel: Channel): Promise<void> 
         } = JSON.parse(msg!.content.toString());
         const mailTransport: mailTransport = {
           appLink: `${config.CLIENT_URL}`,
-          appIcon: 'https://i.ibb.co/Kyp2m0t/cover.png',
+          // appIcon: 'https://i.ibb.co/Kyp2m0t/cover.png',
+          appIcon: `${config.APP_ICON}`,
           username,
           sender,
           offerLink,

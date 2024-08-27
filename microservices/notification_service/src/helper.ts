@@ -12,8 +12,8 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificati
 export async function emailTemplate(template: string, receiver: string, mailTransport: mailTransport): Promise<void> {
   try {
     const smtpTransport = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: Number(config.SMTP_PORT),
+      host: 'localhost',
+      port: 1025,
       auth: {
         user: config.SENDER_EMAIL,
         pass: config.SENDER_PASSWORD

@@ -8,6 +8,7 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificati
 
 export async function sendEmail(template: string, receiveEmail: string, mailTransport: mailTransport): Promise<void> {
   try {
+    console.log('sendEmail function called', template, receiveEmail, mailTransport);
     emailTemplate(template, receiveEmail, mailTransport);
     logger.info('Sending email successfully', template, receiveEmail, mailTransport);
   } catch (err) {

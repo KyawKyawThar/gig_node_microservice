@@ -27,10 +27,10 @@ services:
     container_name: kibana_container
     image: docker.elastic.co/kibana/kibana:8.15.0
     environment:
-      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
-      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
-      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
-      - XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS=${XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS}
+      - ELASTICSEARCH_HOSTS=["http://elasticsearch_container:9200"]
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=kibana
+      - XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS=["http://elasticsearch_container:9200"]
     networks:
       - elastic
     ports:
@@ -128,6 +128,40 @@ services:
       - elastic
     volumes:
       - ./docker_volumes/mysql:/var/lib/mysql
+
+  mongodb:
+    container_name: mongodb_container
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./docker_volumes/mongodb:/data/db
+  
+  redis:
+    container_name: redis_container
+    image: redis:7.4-alpine
+    ports:
+      - 6379:6379
+    restart: always
+    command: redis-server --loglevel warning
+    volumes:
+      - ./docker_volumes/redis:/data
+
+  redis_commander: 
+    container_name: redis_commander
+    image: ghcr.io/joeferner/redis-commander:latest
+    ports:
+      - 8081:8081
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:redis_container:6379
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - 1025:1025
+      - 8025:8025
 
 networks:
   elastic:
