@@ -1,4 +1,4 @@
-import { authService } from '@gateway/api/authService';
+import { authService } from '@gateway/services/api/authService';
 import { config } from '@gateway/config';
 import { winstonLogger } from '@gateway/logger';
 import { NextFunction, Request, Response } from 'express';
@@ -10,7 +10,6 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway se
 class CurrentUser {
   public async read(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      console.log('current user function called.....');
       const response = await authService.getCurrentUser();
       res.status(StatusCodes.OK).json({ message: response.data.message, user: response.data.user });
       logger.info('Get current user request has been received...');

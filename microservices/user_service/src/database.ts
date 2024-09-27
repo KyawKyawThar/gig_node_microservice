@@ -3,7 +3,7 @@ import { winstonLogger } from './logger';
 import { config } from './config';
 import mongoose from 'mongoose';
 
-const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'userDataServer', 'debug');
+const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'Database', 'debug');
 
 export const databaseConnection = async (): Promise<void> => {
   try {

@@ -18,9 +18,13 @@ export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
       }
     }
 
-    await channel.assertExchange(config.EMAIL_EXCHANGE_NAME, 'direct');
-    const assertQueue = await channel.assertQueue(config.EMAIL_QUEUE_NAME, { durable: true, autoDelete: false });
-    await channel.bindQueue(assertQueue.queue, config.EMAIL_EXCHANGE_NAME, config.EMAIL_ROUTING_KEY);
+    //EMAIL_EXCHANGE_NAME=email-notification
+    // EMAIL_QUEUE_NAME=auth-email-queue
+    // EMAIL_ROUTING_KEY=auth-email-key
+
+    await channel.assertExchange('email-notification', 'direct');
+    const assertQueue = await channel.assertQueue('auth-email-queue', { durable: true, autoDelete: false });
+    await channel.bindQueue('auth-email-queue', 'email-notification', 'auth-email-key');
 
     await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
       //consume the message
@@ -61,8 +65,6 @@ export async function consumeOrderEmailMessage(channel: Channel): Promise<void> 
     await channel.bindQueue(assertQueue.queue, config.ORDER_EXCHANGE_NAME, config.ORDER_ROUTING_KEY);
 
     await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
-      console.log(JSON.parse(msg!.content.toString()));
-
       if (msg) {
         const {
           receiverEmail,

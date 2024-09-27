@@ -1,4 +1,4 @@
-import { authService } from '@gateway/api/authService';
+import { authService } from '@gateway/services/api/authService';
 import { config } from '@gateway/config';
 import { winstonLogger } from '@gateway/logger';
 import { AxiosResponse } from 'axios';

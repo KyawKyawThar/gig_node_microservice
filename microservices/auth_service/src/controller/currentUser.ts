@@ -7,9 +7,9 @@ import { getUserByEmail, getUserByID, updateVerifyEmail } from '@auth/services/a
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Logger } from 'winston';
-import { IAuthDocument } from '@auth/types/authTypes';
-// import { publicDirectMessage } from '@auth/queues/auth.producer';
-// import { authChannel } from '@auth/server';
+import { IAuthDocument, IEmailMessageDetails } from '@auth/types/authTypes';
+import { publicDirectMessage } from '@auth/queues/auth.producer';
+import { authChannel } from '@auth/server';
 import { DatabaseError } from 'sequelize';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth-server', 'debug');
@@ -60,21 +60,21 @@ export async function resendEmail(req: Request, res: Response, next: NextFunctio
     const randomByte = crypto.randomBytes(20);
     const randomCharacter = randomByte.toString('hex');
 
-    // const verifyEmailLink = `${config.CLIENT_URL}/confirm_email?v_token=${randomCharacter}`;
+    const verifyEmailLink = `${config.CLIENT_URL}/confirm_email?v_token=${randomCharacter}`;
 
-    // const messageDetail: IEmailMessageDetails = {
-    //   receiverEmail: email,
-    //   template: 'verifyEmail',
-    //   verifyLink: verifyEmailLink
-    // };
+    const messageDetail: IEmailMessageDetails = {
+      receiverEmail: email,
+      template: 'verifyEmail',
+      verifyLink: verifyEmailLink
+    };
 
-    // await publicDirectMessage(
-    //   authChannel,
-    //   config.EMAIL_EXCHANGE_NAME,
-    //   config.EMAIL_ROUTING_KEY,
-    //   JSON.stringify(messageDetail),
-    //   'Verify email message has been sent to notification service.'
-    // );
+    await publicDirectMessage(
+      authChannel,
+      config.EMAIL_EXCHANGE_NAME,
+      config.EMAIL_ROUTING_KEY,
+      JSON.stringify(messageDetail),
+      'Verify email message has been sent to notification service.'
+    );
 
     await updateVerifyEmail(user.id!, 0, randomCharacter);
 

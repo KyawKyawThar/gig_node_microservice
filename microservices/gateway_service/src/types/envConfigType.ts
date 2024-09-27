@@ -10,4 +10,5 @@ export interface Config {
   SECRET_KEY_ONE: string;
   SECRET_KEY_TWO: string;
   BASE_PATH: string;
+  USER_BASE_URL: string;
 }

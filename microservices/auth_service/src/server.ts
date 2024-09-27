@@ -59,8 +59,10 @@ function securityMiddleware(app: Application): void {
   app.use(async (req: Request, _res: Response, next: NextFunction) => {
     if (req.headers?.authorization && req.headers.authorization.startsWith('Bearer')) {
       const token = req.headers.authorization.split(' ')[1];
+
       const payload = verify(token, config.JWT_SECRET) as IAuthPayload;
       req.currentUser = payload;
+      console.log('auth-service', req.url);
     }
     next();
   });
@@ -71,7 +73,7 @@ function standardMiddleware(app: Application): void {
   app.use(json({ limit: '200mb' }));
   app.use(urlencoded({ extended: true, limit: '200mb' }));
 }
-
+//
 function routeMiddleware(app: Application): void {
   appRoutes(app);
 }

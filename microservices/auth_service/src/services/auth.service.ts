@@ -22,7 +22,6 @@ export function firstLetterUpperCase(input: string): string {
 export async function createUser(data: IAuthDocument): Promise<IAuthDocument | DatabaseError | undefined> {
   try {
     const result = await AuthModel.create(data);
-
     const buyerMessageDetail: IAuthBuyerMessageDetails = {
       username: result.dataValues.username,
       profilePicture: result.dataValues.profilePicture,
@@ -33,7 +32,7 @@ export async function createUser(data: IAuthDocument): Promise<IAuthDocument | D
     };
     await publicDirectMessage(
       authChannel,
-      'auth-buyer-update',
+      'user-buyer-update',
       'user-buyer',
       JSON.stringify(buyerMessageDetail),
       'buyer details sends to buyer service'

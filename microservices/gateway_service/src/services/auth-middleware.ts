@@ -7,7 +7,7 @@ import { config } from '@gateway/config';
 class AuthMiddleware {
   public checkAuthentication(req: Request, _res: Response, next: NextFunction): void {
     if (!req.currentUser) {
-      throw new BadRequestError('The user belonging to this token does no longer exist.', 'Gateway service checkAuthentication() method');
+      throw new BadRequestError('You are not logged in! Please log in to get access.', 'Gateway service checkAuthentication() method');
     }
     next();
   }

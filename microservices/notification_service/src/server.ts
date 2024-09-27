@@ -7,7 +7,7 @@ import { config } from '@notifications/config';
 import { healthRoute } from '@notifications/router';
 import { checkConnection } from '@notifications/elasticSearch';
 import { createConnection } from '@notifications/queues/connection';
-import { IEmailMessageDetails } from '@notifications/types/emailMessageDetailType';
+//import { IEmailMessageDetails } from '@notifications/types/emailMessageDetailType';
 
 import { consumeAuthEmailMessage } from './queues/email.consumer';
 
@@ -25,17 +25,17 @@ async function startQueue(): Promise<void> {
   if (connection) {
     //for testing purposes
     //const verifyLink = `${config.CLIENT_URL}/confirm_email?v_token=12345token%433@%23`;
-    const messageDetail: IEmailMessageDetails = {
-      template: 'otpEmail',
-      otp: '355433',
-      //verifyLink,
-      receiverEmail: 'kyawkyaw.thar84@gmail.com'
-    };
-
-    await connection.assertExchange(config.EMAIL_EXCHANGE_NAME, 'direct');
-
-    const authMessage = JSON.stringify(messageDetail);
-    connection.publish(config.EMAIL_EXCHANGE_NAME, config.EMAIL_ROUTING_KEY, Buffer.from(authMessage));
+    // const messageDetail: IEmailMessageDetails = {
+    //   template: 'successResetPassword',
+    //   otp: '355433',
+    //   //verifyLink,
+    //   receiverEmail: 'kyawkyaw.thar84@gmail.com'
+    // };
+    //
+    // await connection.assertExchange(config.EMAIL_EXCHANGE_NAME, 'direct');
+    //
+    // const authMessage = JSON.stringify(messageDetail);
+    // connection.publish(config.EMAIL_EXCHANGE_NAME, config.EMAIL_ROUTING_KEY, Buffer.from(authMessage));
 
     await consumeAuthEmailMessage(connection);
     // await consumeOrderEmailMessage(connection);

@@ -3,11 +3,11 @@ import { randomInt } from 'crypto';
 import { config } from '@auth/config';
 import { BadRequestError, NotAuthorizedError, ServerError } from '@auth/errorHandler';
 import { AuthModel } from '@auth/models/auth.schema';
-//import { publicDirectMessage } from '@auth/queues/auth.producer';
+import { publicDirectMessage } from '@auth/queues/auth.producer';
 import { signInSchema } from '@auth/schemes/signin';
-// import { authChannel } from '@auth/server';
+import { authChannel } from '@auth/server';
 import { getUserByEmail, getUserByUsername, signToken, updateUserOTP } from '@auth/services/auth.service';
-import { IAuthDocument } from '@auth/types/authTypes';
+import { IAuthDocument, IEmailMessageDetails } from '@auth/types/authTypes';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { omit } from 'lodash';
@@ -16,9 +16,9 @@ import { DatabaseError } from 'sequelize';
 import { Logger } from 'winston';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth-server', 'debug');
-export function isEmail(email: string): boolean {
-  const regexExp =
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/gi;
+
+export function isGmail(email: string): boolean {
+  const regexExp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@gmail\.com$/gi;
   return regexExp.test(email);
 }
 
@@ -30,11 +30,11 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
       throw new BadRequestError(error.details[0].message, 'auth-service signIn create() method error');
     }
 
-    const { username, password, browserName, deviceType } = req.body;
+    const { email, password, browserName, deviceType } = req.body;
 
-    const isValid = isEmail(username);
+    const isValid = isGmail(email);
 
-    const result = isValid ? await getUserByEmail(username) : await getUserByUsername(username);
+    const result = isValid ? await getUserByEmail(email) : await getUserByUsername(email);
 
     if (result instanceof DatabaseError) {
       logger.error('SQL Error Message:', result.original.message);
@@ -61,20 +61,20 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
       // min 6 digits and max 6 digits
       // 100000 - 999999
       const otpCode = randomInt(10 ** 5, 10 ** 6 - 1);
-      // const OTPMessageDetail: IEmailMessageDetails = {
-      //   username: existingUser.username,
-      //   receiverEmail: existingUser.email,
-      //   otp: `${otpCode}`,
-      //   template: 'otpEmail'
-      // };
+      const OTPMessageDetail: IEmailMessageDetails = {
+        username: existingUser.username,
+        receiverEmail: existingUser.email,
+        otp: `${otpCode}`,
+        template: 'otpEmail'
+      };
 
-      // await publicDirectMessage(
-      //   authChannel,
-      //   config.EMAIL_EXCHANGE_NAME,
-      //   config.EMAIL_ROUTING_KEY,
-      //   JSON.stringify(OTPMessageDetail),
-      //   'OTP email message sent to notification service.'
-      // );
+      await publicDirectMessage(
+        authChannel,
+        config.EMAIL_EXCHANGE_NAME,
+        config.EMAIL_ROUTING_KEY,
+        JSON.stringify(OTPMessageDetail),
+        'OTP email message sent to notification service.'
+      );
       message = 'OTP code sent';
       const otpExpirationDate = new Date();
       otpExpirationDate.setMinutes(otpExpirationDate.getMinutes() + 10);

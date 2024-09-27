@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { authService } from '@gateway/api/authService';
+import { authService } from '@gateway/services/api/authService';
 import { AxiosResponse } from 'axios';
 import { StatusCodes } from 'http-status-codes';
 import { config } from '@gateway/config';

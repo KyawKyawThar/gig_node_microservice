@@ -34,7 +34,9 @@ function createConfig(): Config {
     SELLER_BASE_PATH: process.env.SELLER_BASE_PATH!,
     CLOUD_NAME: process.env.CLOUD_NAME!,
     CLOUD_API_KEY: process.env.CLOUD_API_KEY!,
-    CLOUD_API_SECRET: process.env.CLOUD_API_SECRET!
+    CLOUD_API_SECRET: process.env.CLOUD_API_SECRET!,
+    SELLER: process.env.SELLER!,
+    BUYER: process.env.BUYER!
   };
 }
 

@@ -16,10 +16,11 @@ import { appRoutes } from './routes';
 import { checkConnection } from './elasticSearch';
 import { IErrorResponse } from './types/errorHandlerTypes';
 import { CustomError } from './errorHandler';
+import { createConnection } from '@user/queues/connection';
+import { consumeBuyerDirectMessage, consumeSellerDirectMessage } from '@user/queues/user.consumer';
+import { StatusCodes } from 'http-status-codes';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'userDataServer', 'debug');
-
-export let userChannel: Channel;
 
 export const start = (app: Application): void => {
   startServer(app);
@@ -32,7 +33,7 @@ export const start = (app: Application): void => {
 };
 
 const securityMiddleware = (app: Application): void => {
-  app.set('trust proxy', 1);
+  // app.set('trust proxy', 1);
 
   app.use(hpp());
   app.use(helmet());
@@ -53,8 +54,9 @@ const securityMiddleware = (app: Application): void => {
   app.use(limiter);
 
   app.use(async (req: Request, _res: Response, next: NextFunction) => {
+    logger.info(req.url);
     if (req.headers?.authorization && req.headers.authorization.startsWith('Bearer')) {
-      const token = req.headers.authorization.split('')[1];
+      const token = req.headers.authorization.split(' ')[1];
       const payload = verify(token, config.JWT_SECRET) as IAuthPayload;
       req.currentUser = payload;
     }
@@ -72,7 +74,11 @@ const routeMiddleware = (app: Application): void => {
   appRoutes(app);
 };
 
-const startQueue = () => {};
+const startQueue = async () => {
+  const userChannel = (await createConnection()) as Channel;
+  await consumeBuyerDirectMessage(userChannel);
+  await consumeSellerDirectMessage(userChannel);
+};
 
 const startElasticSearch = async (): Promise<void> => {
   await checkConnection();
@@ -80,11 +86,13 @@ const startElasticSearch = async (): Promise<void> => {
 
 const userErrorHandler = (app: Application): void => {
   app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.log('error', `User service ${error.comingFrom}`, error?.serializeError());
+    logger.log('error', `User service ${error.comingFrom}`, error.message);
 
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json(error?.serializeError());
     }
+    console.log('code is running here...', error.message);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
     next();
   });
 };
@@ -102,6 +110,6 @@ const startServer = (app: Application): void => {
       logger.log('error', 'Unhandled error:', err);
     });
   } catch (err) {
-    logger.log('error', 'Auth service startHTTPServer() method error: ', err);
+    logger.log('error', 'User service startHTTPServer() method error: ', err);
   }
 };
