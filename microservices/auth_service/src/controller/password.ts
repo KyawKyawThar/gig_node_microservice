@@ -7,9 +7,9 @@ import { changePasswordSchema, emailSchema, passwordSchema } from '@auth/schemes
 import { getUserByEmail, getUserByPasswordToken, updatePassword, updatePasswordToken } from '@auth/services/auth.service';
 import { NextFunction, Request, Response } from 'express';
 import { Logger } from 'winston';
-// import { publicDirectMessage } from '@auth/queues/auth.producer';
-// import { authChannel } from '@auth/server';
-import { IAuthDocument } from '@auth/types/authTypes';
+import { publicDirectMessage } from '@auth/queues/auth.producer';
+import { authChannel } from '@auth/server';
+import { IAuthDocument, IEmailMessageDetails } from '@auth/types/authTypes';
 import { StatusCodes } from 'http-status-codes';
 import { AuthModel } from '@auth/models/auth.schema';
 import { DatabaseError } from 'sequelize';
@@ -40,22 +40,22 @@ export async function forgetPassword(req: Request, res: Response, next: NextFunc
     const randomByte = crypto.randomBytes(20);
     const randomCharacter = randomByte.toString('hex');
 
-    // const resetLink = `${config.CLIENT_URL}/reset_password?v_token=${randomCharacter}`;
+    const resetLink = `${config.CLIENT_URL}/reset_password?v_token=${randomCharacter}`;
 
-    // const messageDetail: IEmailMessageDetails = {
-    //   receiverEmail: user.email,
-    //   resetLink,
-    //   username: user.username,
-    //   template: 'forgotPassword'
-    // };
+    const messageDetail: IEmailMessageDetails = {
+      receiverEmail: user.email,
+      resetLink,
+      username: user.username,
+      template: 'forgotPassword'
+    };
 
-    // await publicDirectMessage(
-    //   authChannel,
-    //   config.EMAIL_EXCHANGE_NAME,
-    //   config.EMAIL_ROUTING_KEY,
-    //   JSON.stringify(messageDetail),
-    //   'Forgot password message sent to notification service.'
-    // );
+    await publicDirectMessage(
+      authChannel,
+      config.EMAIL_EXCHANGE_NAME,
+      config.EMAIL_ROUTING_KEY,
+      JSON.stringify(messageDetail),
+      'Forgot password message sent to notification service.'
+    );
 
     await updatePasswordToken(user.id!, randomCharacter, tokenExpiredDate);
     res.status(StatusCodes.OK).json({ message: 'Password reset email sent.' });
@@ -97,18 +97,19 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
 
     await updatePassword(checkUser.id!, hashPassword);
 
-    // const message: IEmailMessageDetails = {
-    //   username: checkUser.username,
-    //   template: 'resetPasswordSuccess'
-    // };
+    const message: IEmailMessageDetails = {
+      username: checkUser.username,
+      template: 'successResetPassword',
+      receiverEmail: checkUser.email
+    };
 
-    // await publicDirectMessage(
-    //   authChannel,
-    //   config.EMAIL_EXCHANGE_NAME,
-    //   config.EMAIL_QUEUE_NAME,
-    //   JSON.stringify(message),
-    //   'Password change success message sent to notification service.'
-    // );
+    await publicDirectMessage(
+      authChannel,
+      config.EMAIL_EXCHANGE_NAME,
+      config.EMAIL_ROUTING_KEY,
+      JSON.stringify(message),
+      'Password change successResetPassword message sent to notification service.'
+    );
 
     res.status(StatusCodes.OK).json({ message: 'Password successfully updated.' });
     logger.info('Password successfully updated.');
@@ -117,7 +118,7 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
   }
 }
 
-export async function changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function changePassword(req: Request, _res: Response, next: NextFunction): Promise<void> {
   try {
     const { error } = changePasswordSchema.validate(req.body);
 
@@ -127,36 +128,39 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
 
     const { newPassword } = req.body;
 
-    const result = await getUserByEmail(req.currentUser.email);
+    logger.info(newPassword, 'new password from body');
 
-    if (result instanceof DatabaseError) {
-      logger.error('SQL Error Message:', result.original.message);
-      throw new ServerError(result.original.message, 'auth-service changePassword method() error');
-    }
-
-    const checkUser = result as IAuthDocument;
-
-    if (!checkUser) {
-      throw new BadRequestError('Invalid password', 'Password changePassword() method error');
-    }
-
+    // const result = await getUserByEmail(req.currentUser.email);
+    //
+    // if (result instanceof DatabaseError) {
+    //   logger.error('SQL Error Message:', result.original.message);
+    //   throw new ServerError(result.original.message, 'auth-service changePassword method() error');
+    // }
+    //
+    // const checkUser = result as IAuthDocument;
+    //
+    // if (!checkUser) {
+    //   throw new BadRequestError('Invalid password', 'Password changePassword() method error');
+    // }
+    //
     // const messageDetails: IEmailMessageDetails = {
     //   username: checkUser.username,
-    //   template: 'resetPasswordSuccess'
+    //   template: 'successResetPassword',
+    //   receiverEmail: checkUser.email
     // };
-
+    //
     // await publicDirectMessage(
     //   authChannel,
     //   config.EMAIL_EXCHANGE_NAME,
     //   config.EMAIL_ROUTING_KEY,
     //   JSON.stringify(messageDetails),
-    //   'Password change success message sent to notification service.'
+    //   'Password change successResetPassword message sent to notification service.'
     // );
-    const hashPassword = await AuthModel.prototype.hashPassword(newPassword);
-
-    await updatePassword(checkUser.id!, hashPassword);
-
-    res.status(StatusCodes.CREATED).json({ message: 'Password successfully changed.' });
+    // const hashPassword = await AuthModel.prototype.hashPassword(newPassword);
+    //
+    // await updatePassword(checkUser.id!, hashPassword);
+    //
+    // res.status(StatusCodes.CREATED).json({ message: 'Password successfully changed.' });
   } catch (err) {
     next(err);
   }

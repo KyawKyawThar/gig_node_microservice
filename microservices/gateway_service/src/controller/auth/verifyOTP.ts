@@ -1,4 +1,4 @@
-import { authService } from '@gateway/api/authService';
+import { authService } from '@gateway/services/api/authService';
 import { NextFunction, Request, Response } from 'express';
 import { winstonLogger } from '@gateway/logger';
 import { Logger } from 'winston';

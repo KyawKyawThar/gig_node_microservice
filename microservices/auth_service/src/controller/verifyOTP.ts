@@ -26,7 +26,7 @@ export async function verifyOTP(req: Request, res: Response, next: NextFunction)
     }
 
     const user = result as IAuthDocument;
-    console.log('result is:', user);
+
     if (!user) {
       throw new BadRequestError('OTP is either invalid or expired.', 'auth-service verifyOTP method() error');
     }

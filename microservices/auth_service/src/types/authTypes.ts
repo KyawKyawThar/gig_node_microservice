@@ -38,8 +38,8 @@ export interface IAuthDocument {
   profilePicture?: string;
   emailVerified?: number;
   emailVerificationToken?: string;
-  browserName?: string;
-  deviceType?: string;
+  browserName: string;
+  deviceType: string;
   otp?: string;
   otpExpirationDate?: Date;
   createdAt?: Date;

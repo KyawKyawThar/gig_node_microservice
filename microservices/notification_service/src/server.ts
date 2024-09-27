@@ -7,7 +7,7 @@ import { config } from '@notifications/config';
 import { healthRoute } from '@notifications/router';
 import { checkConnection } from '@notifications/elasticSearch';
 import { createConnection } from '@notifications/queues/connection';
-import { IEmailMessageDetails } from '@notifications/types/emailMessageDetailType';
+//import { IEmailMessageDetails } from '@notifications/types/emailMessageDetailType';
 
 import { consumeAuthEmailMessage } from './queues/email.consumer';
 
@@ -24,19 +24,20 @@ async function startQueue(): Promise<void> {
   const connection = await createConnection();
   if (connection) {
     //for testing purposes
-    const verifyLink = `${config.CLIENT_URL}/confirm_email?v_token=12345token%433@%23`;
+    //const verifyLink = `${config.CLIENT_URL}/confirm_email?v_token=12345token%433@%23`;
+    // const messageDetail: IEmailMessageDetails = {
+    //   template: 'successResetPassword',
+    //   otp: '355433',
+    //   //verifyLink,
+    //   receiverEmail: 'kyawkyaw.thar84@gmail.com'
+    // };
+    //
+    // await connection.assertExchange(config.EMAIL_EXCHANGE_NAME, 'direct');
+    //
+    // const authMessage = JSON.stringify(messageDetail);
+    // connection.publish(config.EMAIL_EXCHANGE_NAME, config.EMAIL_ROUTING_KEY, Buffer.from(authMessage));
+
     await consumeAuthEmailMessage(connection);
-    await connection.assertExchange(config.EMAIL_EXCHANGE_NAME, 'direct');
-
-    const messageDetail: IEmailMessageDetails = {
-      template: 'verifyEmail',
-      verifyLink,
-      receiverEmail: `${config.SENDER_EMAIL}`
-    };
-
-    const authMessage = JSON.stringify(messageDetail);
-    connection.publish(config.EMAIL_EXCHANGE_NAME, config.EMAIL_ROUTING_KEY, Buffer.from(authMessage));
-
     // await consumeOrderEmailMessage(connection);
     // await connection.assertExchange(config.ORDER_EXCHANGE_NAME, 'direct');
     // const orderMessage = JSON.stringify({ name: 'nicholas', service: 'order notification service' });
@@ -47,6 +48,7 @@ async function startQueue(): Promise<void> {
 }
 
 async function startElasticSearch(): Promise<void> {
+  logger.info('running elastic search');
   await checkConnection();
 }
 

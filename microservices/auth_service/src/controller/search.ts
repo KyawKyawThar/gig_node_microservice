@@ -19,7 +19,7 @@ export async function singleElementByGig(req: Request, res: Response, next: Next
   }
 }
 
-export async function gigs(req: Request, res: Response, next: NextFunction) {
+export async function gigs(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { type, size, from } = req.params;
     console.log('authService gigs', { type, size, from });

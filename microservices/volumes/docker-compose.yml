@@ -1,4 +1,5 @@
 services:
+#Logstash will be implemented later
   elasticsearch:
     container_name: elasticsearch_container
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
@@ -15,39 +16,39 @@ services:
       - xpack.security.enrollment.enabled=true
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     ports:
-      - 9300:9300
-      - 9200:9200
+      - "9300:9300"
+      - "9200:9200"
     restart: always
     volumes:
       - ./docker_volumes/elasticsearch_data:/usr/share/elasticsearch/data
     networks:
       - elastic
-  
+
   kibana:
     container_name: kibana_container
     image: docker.elastic.co/kibana/kibana:8.15.0
     environment:
-      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
-      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
-      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
-      - XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS=${XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS}
+      - ELASTICSEARCH_HOSTS=["http://elasticsearch_container:9200"]
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=kibana
+      - XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS=["http://elasticsearch_container:9200"]
     networks:
       - elastic
     ports:
-      - 5601:5601
+      - "5601:5601"
     volumes:
       - ./kibana.yml/:/usr/share/kibana/config/kibana.yml:ro
     restart: always
     depends_on:
       - elasticsearch
-    
+
   metricbeat:
     container_name: metricbeat_container
     image: docker.elastic.co/beats/metricbeat:8.15.0
     #able to allow metricbeat to read docker socket
     user: root
     ports:
-      - 5066:5066
+      - "5066:5066"
     command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
     depends_on:
       - elasticsearch
@@ -67,7 +68,7 @@ services:
     container_name: apm_server_container
     image: docker.elastic.co/apm/apm-server:8.15.0
     ports:
-      - 8200:8200
+      - "8200:8200"
     restart: always
     networks:
       - elastic
@@ -89,9 +90,9 @@ services:
     image: rabbitmq:4.0-rc-management-alpine
     ports:
         # AMQP protocol port
-      - 5672:5672
+      - "5672:5672"
       # Management UI
-      - 15672:15672
+      - "15672:15672"
     restart: always
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USERNAME}
@@ -117,7 +118,7 @@ services:
     container_name: mysql_container
     image: mysql
     ports:
-      - 3306:3306
+      - "3306:3306"
     restart: always
     environment:
       - MYSQL_USER=${MYSQL_USER}
@@ -128,6 +129,41 @@ services:
       - elastic
     volumes:
       - ./docker_volumes/mysql:/var/lib/mysql
+
+  mongodb:
+    container_name: mongodb_container
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./docker_volumes/mongodb:/data/db
+
+  redis:
+    container_name: redis_container
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+    restart: always
+    command: redis-server --loglevel warning
+    volumes:
+      - ./docker_volumes/redis:/data
+
+  redis_commander:
+    container_name: redis_commander
+    image: ghcr.io/joeferner/redis-commander:latest
+    ports:
+      - "8081:8081"
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:redis_container:6379
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: always
 
 networks:
   elastic:

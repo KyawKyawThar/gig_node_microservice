@@ -29,7 +29,8 @@ function createConfig(): Config {
     JWT_SECRET: process.env.JWT_SECRET!,
     SECRET_KEY_ONE: process.env.SECRET_KEY_ONE!,
     SECRET_KEY_TWO: process.env.SECRET_KEY_TWO!,
-    BASE_PATH: process.env.BASE_PATH!
+    BASE_PATH: process.env.BASE_PATH!,
+    USER_BASE_URL: process.env.USER_BASE_URL!
   };
 }
 

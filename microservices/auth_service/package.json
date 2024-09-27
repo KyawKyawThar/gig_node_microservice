@@ -20,6 +20,7 @@
   "description": "",
   "dependencies": {
     "@elastic/elasticsearch": "^8.14.0",
+    "@faker-js/faker": "^9.0.1",
     "@types/bcrypt": "^5.0.2",
     "@types/sequelize": "^4.28.20",
     "amqplib": "^0.10.4",
@@ -42,6 +43,7 @@
     "sequelize": "^6.37.3",
     "typescript": "^5.5.4",
     "typescript-transform-paths": "^3.4.7",
+    "unique-names-generator": "^4.7.1",
     "uuid": "^10.0.0",
     "winston": "^3.13.1",
     "winston-elasticsearch": "^0.19.0"
