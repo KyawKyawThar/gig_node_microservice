@@ -1,4 +1,5 @@
 export interface Config {
+  ENABLE_APM: string;
   USER_SERVER_PORT: string;
   NODE_ENV: string;
   CLIENT_URL: string;

@@ -5,11 +5,7 @@ import JWT from 'jsonwebtoken';
 import { config } from './config';
 
 export function verifySellerGatewayRequest(req: Request, _res: Response, next: NextFunction) {
-  if (!req.headers.gatewaytoken) {
-    throw new NotAuthorizedError('Invalid request', 'verifySellerGatewayRequest() method: Request not coming from api gateway');
-  }
-
-  const token = req.headers.gatewaytoken as string;
+  const token = req.headers.gatewayToken as string;
   if (!token) {
     throw new NotAuthorizedError('Invalid request', 'verifySellerGatewayRequest() method: Token is not valid from api gateway');
   }
@@ -28,11 +24,11 @@ export function verifySellerGatewayRequest(req: Request, _res: Response, next: N
 }
 
 export function verifyBuyerGatewayRequest(req: Request, _res: Response, next: NextFunction) {
-  if (!req.headers.gatewaytoken) {
+  if (!req.headers.gatewayToken) {
     throw new NotAuthorizedError('Invalid request', 'verifyBuyerGatewayRequest() method: Request not coming from api gateway');
   }
 
-  const token = req.headers.gatewaytoken as string;
+  const token = req.headers.gatewayToken as string;
 
   if (!token) {
     throw new NotAuthorizedError('Invalid request', 'verifyBuyerGatewayRequest() method: Token is not valid from api gateway');

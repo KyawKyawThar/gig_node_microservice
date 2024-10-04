@@ -21,7 +21,7 @@ class ElasticSearch {
         logger.info(`Gateway Service ElasticSearch health check - ${health.status}`);
         isConnected = true;
       } catch (err) {
-        logger.error('Connection to elasticsearch failed.Retrying...');
+        logger.error('Connection to elasticsearch failed.');
         logger.log('error', 'Gateway Service checkConnection() method:', err);
       }
     }

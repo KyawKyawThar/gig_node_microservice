@@ -8,7 +8,7 @@ heartbeat.monitors:
   id: notification_service
   name: Notification Service
   schedule: '@every 5s'
-#  hosts: ["http://<your-ip>:4001/notification-health"]
+  #  hosts: ["http://<your-ip>:4001/notification-health"]
   hosts: ["http://localhost:4001/notification-health"]
   check.request.method: GET
   check.response.status: [200]
@@ -17,7 +17,7 @@ heartbeat.monitors:
   id: gateway_service
   name: Gateway Service
   schedule: '@every 5s'
-#  hosts: ["http://<your-ip>:4000/gateway-health"]
+  #  hosts: ["http://<your-ip>:4000/gateway-health"]
   hosts: ["http://localhost:4000/gateway-health"]
   check.request.method: GET
   check.response.status: [200]
@@ -26,7 +26,7 @@ heartbeat.monitors:
   id: auth_service
   name: Auth Service
   schedule: '@every 5s'
-#  hosts: ["http://<your-ip>:4002/auth-health"]
+  #  hosts: ["http://<your-ip>:4002/auth-health"]
   hosts: ["http://localhost:4002/auth-health"]
   check.request.method: GET
   check.response.status: [200]
@@ -35,8 +35,8 @@ heartbeat.monitors:
   id: user_service
   name: User Service
   schedule: '@every 5s'
-#  hosts: ['http://<your-ip>:40023/user-health']
-  hosts: [ 'http://localhost:40023/user-health' ]
+  #  hosts: ['http://<your-ip>:40023/user-health']
+  hosts: ['http://localhost:40023/user-health']
   check.request.method: GET
   check.response.status: [200]
 

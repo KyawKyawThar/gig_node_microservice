@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { Config } from './types/envConfigTypes';
 
 dotenv.config();
-if (process.env.ENABLE_AMP === '1') {
+if (process.env.ENABLE_APM === '1') {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('elastic-apm-node').start({
     serviceName: 'user_service',
@@ -18,6 +18,7 @@ if (process.env.ENABLE_AMP === '1') {
 
 function createConfig(): Config {
   return {
+    ENABLE_APM: process.env.ENABLE_APM!,
     USER_SERVER_PORT: process.env.USER_SERVER_PORT!,
     NODE_ENV: process.env.NODE_ENV!,
     CLIENT_URL: process.env.CLIENT_URL!,

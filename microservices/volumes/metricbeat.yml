@@ -52,16 +52,16 @@ metricbeat.modules:
   period: 10s
   hosts: ["127.0.0.1:15672"]
 
-# - module: mongodb
-#   metricsets: ["dbstats", "status", "collstats", "metrics", "replstatus"]
-#   period: 10s
-#   enabled: true
-#   # The hosts must be passed as MongoDB URLs in the format:
-#   # [mongodb://][user:pass@]host[:port].
-#   # The username and password can also be set using the respective configuration
-#   # options. The credentials in the URL take precedence over the username and
-#   # password configuration options.
-#   hosts: ["mongodb://127.0.0.1:27017"]
+- module: mongodb
+  metricsets: ["dbstats", "status", "collstats", "metrics", "replstatus"]
+  period: 10s
+  enabled: true
+  # The hosts must be passed as MongoDB URLs in the format:
+  # [mongodb://][user:pass@]host[:port].
+  # The username and password can also be set using the respective configuration
+  # options. The credentials in the URL take precedence over the username and
+  # password configuration options.
+  hosts: ["mongodb://127.0.0.1:27017"]
 
 - module: mysql
   metricsets:
@@ -71,6 +71,7 @@ metricbeat.modules:
   hosts: ["tcp(127.0.0.1:3306)/"]
   username: nicholas
   password: my-secret
+
 # - module: postgresql
 #   enabled: true
 #   metricsets:
