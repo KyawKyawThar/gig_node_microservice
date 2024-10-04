@@ -5,11 +5,7 @@ import { NotAuthorizedError } from './errorHandler';
 import { config } from './config';
 
 export function verifyAuthGatewayRequest(req: Request, _res: Response, next: NextFunction) {
-  if (!req.headers.gatewaytoken) {
-    throw new NotAuthorizedError('Invalid request', 'verifyAuthGatewayRequest() method: Request not coming from api gateway');
-  }
-
-  const token = req.headers?.gatewaytoken as string;
+  const token = req.headers?.gatewayToken as string;
 
   if (!token) {
     throw new NotAuthorizedError('Invalid request', 'verifyAuthGatewayRequest() method: Token is not valid from api gateway');

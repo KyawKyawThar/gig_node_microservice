@@ -39,6 +39,7 @@ export class GateWayService {
   private securityMiddleware(app: Application): void {
     app.set('trust proxy', '1');
 
+    //IMPORTANT NOTE: be careful using SECRET_KEY_ONE and SECRET_KEY_TWO  enable key rotation.
     app.use(
       cookieSession({
         name: 'session',

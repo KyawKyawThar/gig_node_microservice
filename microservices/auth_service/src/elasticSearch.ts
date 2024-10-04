@@ -20,8 +20,7 @@ export async function checkConnection(): Promise<void> {
       logger.info(`Auth Service ElasticSearch health check - ${health.status}`);
       isConnected = true;
     } catch (err) {
-      logger.error('Connection to elasticsearch failed.Retrying...');
-      logger.log('error', 'Auth Service checkConnection() method:', err);
+      logger.error('error', 'Auth Service checkConnection() method:', err);
     }
   }
 }

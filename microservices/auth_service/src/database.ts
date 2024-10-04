@@ -25,8 +25,7 @@ export async function databaseConnection(): Promise<void> {
     await sequelize.authenticate();
     logger.info('AuthService MySQL Database Connection established successfully');
   } catch (e) {
-    logger.error('Auth service- Unable to connect to database');
-    logger.log('error', 'auth service databaseConnection method error', e);
+    logger.error('error', 'auth service databaseConnection method error', e);
   }
 }
 
