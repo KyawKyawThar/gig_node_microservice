@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import { Config } from './types/envConfigTypes';
 
 dotenv.config();
-if (process.env.ENABLE_AMP === '1') {
+if (process.env.ENABLE_APM === '1') {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('elastic-apm-node').start({
     serviceName: 'notification_service',
