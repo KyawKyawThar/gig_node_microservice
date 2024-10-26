@@ -77,7 +77,7 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
     const { password, confirmPassword } = req.body;
     const { token } = req.params;
     if (password !== confirmPassword) {
-      throw new BadRequestError('Username or Passwords do not match', 'Password resetPassword() method error');
+      throw new BadRequestError('password or confirmPassword do not match', 'Password resetPassword() method error');
     }
 
     const result = await getUserByPasswordToken(token);
@@ -90,7 +90,7 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
     const checkUser = result as IAuthDocument;
 
     if (!checkUser) {
-      throw new BadRequestError('Reset token has expired', 'Password resetPassword() method error');
+      throw new BadRequestError('Reset token is invalid OR expired', 'Password resetPassword() method error');
     }
 
     const hashPassword = await AuthModel.prototype.hashPassword(password);
@@ -118,7 +118,7 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
   }
 }
 
-export async function changePassword(req: Request, _res: Response, next: NextFunction): Promise<void> {
+export async function changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { error } = changePasswordSchema.validate(req.body);
 
@@ -130,37 +130,37 @@ export async function changePassword(req: Request, _res: Response, next: NextFun
 
     logger.info(newPassword, 'new password from body');
 
-    // const result = await getUserByEmail(req.currentUser.email);
-    //
-    // if (result instanceof DatabaseError) {
-    //   logger.error('SQL Error Message:', result.original.message);
-    //   throw new ServerError(result.original.message, 'auth-service changePassword method() error');
-    // }
-    //
-    // const checkUser = result as IAuthDocument;
-    //
-    // if (!checkUser) {
-    //   throw new BadRequestError('Invalid password', 'Password changePassword() method error');
-    // }
-    //
-    // const messageDetails: IEmailMessageDetails = {
-    //   username: checkUser.username,
-    //   template: 'successResetPassword',
-    //   receiverEmail: checkUser.email
-    // };
-    //
-    // await publicDirectMessage(
-    //   authChannel,
-    //   config.EMAIL_EXCHANGE_NAME,
-    //   config.EMAIL_ROUTING_KEY,
-    //   JSON.stringify(messageDetails),
-    //   'Password change successResetPassword message sent to notification service.'
-    // );
-    // const hashPassword = await AuthModel.prototype.hashPassword(newPassword);
-    //
-    // await updatePassword(checkUser.id!, hashPassword);
-    //
-    // res.status(StatusCodes.CREATED).json({ message: 'Password successfully changed.' });
+    const result = await getUserByEmail(req.currentUser.email);
+
+    if (result instanceof DatabaseError) {
+      logger.error('SQL Error Message:', result.original.message);
+      throw new ServerError(result.original.message, 'auth-service changePassword method() error');
+    }
+
+    const checkUser = result as IAuthDocument;
+
+    if (!checkUser) {
+      throw new BadRequestError('Invalid password', 'Password changePassword() method error');
+    }
+
+    const messageDetails: IEmailMessageDetails = {
+      username: checkUser.username,
+      template: 'successResetPassword',
+      receiverEmail: checkUser.email
+    };
+
+    await publicDirectMessage(
+      authChannel,
+      config.EMAIL_EXCHANGE_NAME,
+      config.EMAIL_ROUTING_KEY,
+      JSON.stringify(messageDetails),
+      'Password change successResetPassword message sent to notification service.'
+    );
+    const hashPassword = await AuthModel.prototype.hashPassword(newPassword);
+
+    await updatePassword(checkUser.id!, hashPassword);
+
+    res.status(StatusCodes.CREATED).json({ message: 'Password successfully changed.' });
   } catch (err) {
     next(err);
   }

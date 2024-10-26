@@ -56,8 +56,8 @@ export async function signUp(req: Request, res: Response, next: NextFunction): P
       password,
       country,
       profilePublicId,
-      browserName,
-      deviceType,
+      browserName: browserName.toLowerCase(),
+      deviceType: deviceType.toLowerCase(),
       profilePicture: uploadResult.secure_url,
       emailVerificationToken: randomCharacter
     } as IAuthDocument;

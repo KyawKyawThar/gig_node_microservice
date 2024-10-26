@@ -17,9 +17,15 @@ import { appRoutes } from '@gateway/routes';
 import { axiosAuthInstance } from '@gateway/services/api/authService';
 import { axiosBuyerInstance } from '@gateway/services/api/buyerService';
 import { axiosSellerInstance } from '@gateway/services/api/sellerService';
+import { axiosGigInstance } from '@gateway/services/api/gigService';
+import { Server } from 'socket.io';
+import { createClient } from 'redis';
+import { SocketIOAppHandler } from '@gateway/socket/socket';
+import { createAdapter } from '@socket.io/redis-adapter';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway server', 'debug');
 
+export let socketIO: Server;
 export class GateWayService {
   private readonly app: Application;
 
@@ -45,7 +51,7 @@ export class GateWayService {
         name: 'session',
         keys: [config.SECRET_KEY_ONE, config.SECRET_KEY_TWO],
         secure: config.NODE_ENV !== 'development',
-        maxAge: 24 * 60 * 60 * 1000
+        maxAge: 15 * 60 * 1000
       })
     );
 
@@ -62,7 +68,9 @@ export class GateWayService {
         axiosAuthInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
         axiosBuyerInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
         axiosSellerInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
+        axiosGigInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
       }
+
       next();
     });
     app.use(hpp());
@@ -115,7 +123,7 @@ export class GateWayService {
         //   message: axiosError.response?.data || 'Error occurred.',
         //   service: serviceName
         // });
-        res.status(err?.response?.data?.statusCode ?? 500).json({ message: err?.response?.data?.message ?? 'Error occurred.' });
+        res.status(err?.response?.data?.statusCode ?? 500).json({ message: err?.response?.data?.message ?? 'Something went wrong..' });
       }
 
       // console.log('ttt', err?.response?.data?.message);
@@ -131,16 +139,38 @@ export class GateWayService {
   private async startServer(app: Application): Promise<void> {
     try {
       const httpServer: http.Server = new http.Server(app);
+      const socketIO = await this.createSocketIOServer(httpServer);
       await this.startHTTPServer(httpServer);
+      this.socketIOConnection(socketIO);
     } catch (err) {
       logger.log('error', 'Gateway service startServer() method error: ', err);
     }
   }
 
+  private async createSocketIOServer(httpServer: http.Server): Promise<Server> {
+    const io: Server = new Server(httpServer, {
+      cors: {
+        origin: `${config.CLIENT_BASE_URL}`,
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+      }
+    });
+    const pubClient = createClient({ url: config.REDIS_HOST });
+    const subClient = pubClient.duplicate();
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    io.adapter(createAdapter(pubClient, subClient));
+    socketIO = io;
+    return io;
+  }
+
+  private socketIOConnection(io: Server): void {
+    const socketIOHandler = new SocketIOAppHandler(io);
+    socketIOHandler.listen();
+  }
+
   private async startHTTPServer(httpServer: http.Server): Promise<void> {
     try {
       logger.info(`Gateway service has started with process id ${process.pid}`);
-
       httpServer.listen(config.GATEWAY_SERVER_PORT, () => {
         logger.info(`Gateway service is running on port: ${config.GATEWAY_SERVER_PORT}`);
       });

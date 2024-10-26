@@ -14,7 +14,8 @@ class CurrentUserRoute {
     this.router.get('/auth/current-user', authMiddleware.checkAuthentication, currentUser.read);
     this.router.get('/auth/refresh-token/:username', authMiddleware.checkAuthentication, refresh.token);
     this.router.post('/auth/resend-email', authMiddleware.checkAuthentication, currentUser.resendEmail);
-
+    this.router.get('/auth/logged-in-user', authMiddleware.checkAuthentication, currentUser.getLoggedInUser);
+    this.router.delete('/auth/logged-out-user', authMiddleware.checkAuthentication, currentUser.removeLoggedInUser);
     return this.router;
   }
 }

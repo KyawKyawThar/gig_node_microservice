@@ -13,7 +13,6 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'seller-ser
 
 export const sellerUpdate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // // @ts-ignore
     // const { error } = Promise.resolve(sellerSchemaValidate.validate(req.body));
 
     // if (error.details) {
@@ -37,7 +36,7 @@ export const sellerUpdate = async (req: Request, res: Response, next: NextFuncti
     //   skills: req.body.skills
     // };
 
-    console.log('sellerUpdate.....');
+    // console.log('sellerUpdate.....');
     const sellerData = req.body;
     const update = await updateSeller(req.params.sellerId, sellerData);
 

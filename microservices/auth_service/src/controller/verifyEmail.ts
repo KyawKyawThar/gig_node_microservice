@@ -23,6 +23,9 @@ export async function verifyEmail(req: Request, res: Response, next: NextFunctio
     }
     const checkUserIfExists = result as IAuthDocument;
 
+    if (checkUserIfExists.emailVerified) {
+      throw new BadRequestError('email already verified.', 'auth-service verifyEmail method() error');
+    }
     if (!checkUserIfExists) {
       throw new BadRequestError('user does not exist', 'auth-service verifyEmail method() error');
     }
@@ -34,7 +37,7 @@ export async function verifyEmail(req: Request, res: Response, next: NextFunctio
 
     logger.info('Email verification successfully');
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     next(err);
   }
 }

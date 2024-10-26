@@ -51,13 +51,14 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
         throw new NotAuthorizedError('Username or Passwords do not match', 'auth-service signIn method() error');
       }
     }
+
     let userJWT: string = '';
     let userData: IAuthDocument | null = null;
     let message: string = 'User login successfully';
     let userBrowserName: string = '';
     let userDeviceType: string = '';
 
-    if (browserName !== existingUser.browserName || deviceType !== existingUser.deviceType) {
+    if (browserName.toLowerCase() !== existingUser.browserName || deviceType.toLowerCase() !== existingUser.deviceType) {
       // min 6 digits and max 6 digits
       // 100000 - 999999
       const otpCode = randomInt(10 ** 5, 10 ** 6 - 1);

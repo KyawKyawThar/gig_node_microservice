@@ -9,7 +9,7 @@ const sellerSchema: Schema = new Schema(
     profilePicture: { type: String, required: true },
     description: { type: String, required: true },
     profilePublicID: { type: String, required: true },
-    oneliner: { type: String, default: '' },
+    onliner: { type: String, default: '' },
     country: { type: String, required: true },
     languages: [
       {

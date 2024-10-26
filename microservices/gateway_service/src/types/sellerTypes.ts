@@ -12,7 +12,6 @@ export type SellerType =
   | IExperience[]
   | IEducation
   | IEducation[]
-  | ICertificate
   | ICertificate[]
   | ILanguage
   | ILanguage[]

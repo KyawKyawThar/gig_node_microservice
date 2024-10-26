@@ -10,8 +10,8 @@ const router: Router = express.Router();
 //put(`/verify-otp/${otp}`, body);
 export function authRouter(): Router {
   router.post('/sign-up', signUp);
-  router.post('/sign-in', signIn);
   router.put('/verify-email', verifyEmail);
+  router.post('/sign-in', signIn);
   router.put('/verify-otp/:otp', verifyOTP);
   router.put('/forget-password', forgetPassword);
   router.post('/reset-password/:token', resetPassword);

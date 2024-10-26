@@ -18,6 +18,7 @@ export interface IAuthPayload {
   username: string;
   email: string;
   iat?: number;
+  exp?: number;
 }
 
 export interface IAuth {

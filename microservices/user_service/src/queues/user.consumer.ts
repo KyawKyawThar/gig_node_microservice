@@ -10,7 +10,8 @@ import {
   updateSellerCancelledJobsProp,
   updateSellerCompletedJobsProp,
   updateSellerOngoingJobsProp,
-  updateSellerReview
+  updateSellerReview,
+  updateTotalGigsCount
 } from '@user/services/seller.service';
 import { publicDirectMessage } from '@user/queues/user.producer';
 
@@ -21,7 +22,6 @@ export const consumeBuyerDirectMessage = async (channel: Channel): Promise<void>
     if (!channel) {
       channel = (await createConnection()) as Channel;
     }
-
     const exchangeName = 'user-buyer-update';
     const routingKey = 'user-buyer';
     const queueName = 'user-buyer-queue';
@@ -32,11 +32,9 @@ export const consumeBuyerDirectMessage = async (channel: Channel): Promise<void>
 
     await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
       if (msg) {
-        const { type } = JSON.parse(msg!.content.toString());
+        const { type, username, profilePicture, email, country, createdAt } = JSON.parse(msg!.content.toString());
 
         if (type === 'auth') {
-          const { username, profilePicture, email, country, createdAt } = JSON.parse(msg!.content.toString());
-
           const buyer: IBuyerDocument = {
             username,
             profilePicture,
@@ -73,15 +71,18 @@ export const consumeSellerDirectMessage = async (channel: Channel): Promise<void
 
       await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
         if (msg) {
-          const { type, sellerId, ongoingJobs, completedJobs, totalEarnings, recentDelivery } = JSON.parse(msg!.content.toString());
+          const { type, count, sellerId, ongoingJobs, completedJobs, totalEarnings, recentDelivery } = JSON.parse(msg!.content.toString());
 
           switch (type) {
             case 'create-order':
               await updateSellerOngoingJobsProp(sellerId, ongoingJobs);
               break;
+            case 'update-gig-count':
+              await updateTotalGigsCount(sellerId, count);
             case 'approve-order':
               await updateSellerCompletedJobsProp({ sellerId, ongoingJobs, completedJobs, totalEarnings, recentDelivery });
               break;
+
             case 'cancel-order':
               await updateSellerCancelledJobsProp(sellerId);
               break;
@@ -104,7 +105,7 @@ export const consumeReviewFanoutDirectMessage = async (channel: Channel): Promis
 
       await channel.assertExchange(exchangeName, 'fanout');
       const assertQueue = await channel.assertQueue(queueName, { durable: true, autoDelete: false });
-      await channel.bindQueue(assertQueue.queue, exchangeName, '');
+      await channel.bindQueue(assertQueue.queue, exchangeName, queueName);
 
       await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
         if (msg) {
@@ -126,7 +127,7 @@ export const consumeReviewFanoutDirectMessage = async (channel: Channel): Promis
       });
     }
   } catch (error) {
-    logger.log('error', 'UserService seller consumer consumeReviewDirectMessage() method error: ', error);
+    logger.log('error', 'UserService consumeReviewDirectMessage() method error: ', error);
   }
 };
 
@@ -134,34 +135,35 @@ export const consumeSeedGigDirectMessage = async (channel: Channel): Promise<voi
   try {
     if (!channel) {
       channel = (await createConnection()) as Channel;
-      const exchangeName = 'user-seller-seed';
-      const routingKey = 'seller-gig';
-      const queueName = 'user-gig-queue';
-
-      await channel.assertExchange(exchangeName, 'direct');
-      const assertQueue = await channel.assertQueue(queueName, { durable: true, autoDelete: false });
-      await channel.bindQueue(assertQueue.queue, exchangeName, routingKey);
-
-      await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
-        if (msg) {
-          const { type } = JSON.parse(msg!.content.toString());
-
-          if (type === 'getSellers') {
-            const { count } = JSON.parse(msg!.content.toString());
-            const randomSeller: ISellerDocument[] = (await getRandomSeller(parseInt(count, 10))) as ISellerDocument[];
-
-            await publicDirectMessage(
-              channel,
-              'user-seed-gigs',
-              'receive-seller',
-              JSON.stringify({ type: 'receiveSellers', randomSeller, count }),
-              'Message sent to gig service'
-            );
-          }
-          channel.ack(msg);
-        }
-      });
     }
+
+    const exchangeName = 'user-seller-seed';
+    const routingKey = 'seller-gig';
+    const queueName = 'user-gig-queue';
+
+    await channel.assertExchange(exchangeName, 'direct');
+    const assertQueue = await channel.assertQueue(queueName, { durable: true, autoDelete: false });
+    await channel.bindQueue(assertQueue.queue, exchangeName, routingKey);
+
+    await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
+      if (msg) {
+        const { type } = JSON.parse(msg!.content.toString());
+
+        if (type === 'getSellers') {
+          const { count } = JSON.parse(msg!.content.toString());
+          const randomSeller: ISellerDocument[] = (await getRandomSeller(parseInt(count, 10))) as ISellerDocument[];
+
+          await publicDirectMessage(
+            channel,
+            'user-seed-gigs',
+            'receive-seller',
+            JSON.stringify({ type: 'receiveSellers', randomSeller, count }),
+            'Message sent to gig service'
+          );
+        }
+        channel.ack(msg);
+      }
+    });
   } catch (error) {
     logger.log('error', 'UserService buyer consumeBuyerDirectMessage() method error:', error);
   }

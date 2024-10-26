@@ -82,6 +82,7 @@ export async function resendEmail(req: Request, res: Response, next: NextFunctio
 
     res.status(StatusCodes.CREATED).json({ message: 'Email verification sent', user: updateUser });
   } catch (error) {
+    // console.log('error is:', error);
     next(error);
   }
 }

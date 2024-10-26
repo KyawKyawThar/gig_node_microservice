@@ -27,10 +27,6 @@ export async function checkConnection(): Promise<void> {
 
 async function checkIndexIsExists(indexName: string): Promise<boolean> {
   const result = await elasticSearchClient.indices.exists({ index: indexName });
-
-  if (result) {
-    logger.info(`Index ${indexName} is already exists`);
-  }
   return result;
 }
 
@@ -42,6 +38,8 @@ export async function createIndex(indexName: string): Promise<void> {
       await elasticSearchClient.indices.create({ index: indexName });
       await elasticSearchClient.indices.refresh({ index: indexName });
       logger.info(`created index "${indexName}"`);
+    } else {
+      logger.info(`Index ${indexName} is already exists`);
     }
   } catch (error) {
     logger.info(`An error occurred while creating ${indexName} index`);
@@ -52,14 +50,12 @@ export async function createIndex(indexName: string): Promise<void> {
 export async function getDocumentByID(index: string, gigID: string): Promise<ISellerGig> {
   try {
     const result = await elasticSearchClient.get({ index, id: gigID });
-    logger.info('get element by ID from elasticSearch.');
+
     return result._source as ISellerGig;
   } catch (error) {
-    logger.log('error', 'Auth Service elasticSearch getElementByID() method: ', error);
     return {} as ISellerGig;
   }
 }
-
 export async function getGigsBySearch(
   index: string,
   queryList: IQueryList[],
@@ -78,6 +74,13 @@ export async function getGigsBySearch(
       },
       sort: [{ sortId: type === 'forward' ? 'asc' : 'desc' }],
       ...(from !== '0' && { search_after: [from] })
+      //from is '0': from !== '0' evaluates to false
+      //The expression becomes ...(false) which results in nothing being added to the object
+      //So, search_after is omitted from the query.
+
+      //from is '10  evaluates to true
+      //The expression becomes ...{ search_after: ['10'] }, which adds search_after to the query
+      //{ search_after: [from] }
     });
     return result.hits as ISearchResult;
   } catch (error) {

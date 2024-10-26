@@ -10,7 +10,6 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway se
 
 export class Get {
   public async email(_req: Request, res: Response, next: NextFunction): Promise<void> {
-    console.log('email route called..');
     try {
       const response: AxiosResponse = await buyerService.email();
       res.status(StatusCodes.OK).json({ message: response.data.message, buyer: response.data.buyer });
