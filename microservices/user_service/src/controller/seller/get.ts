@@ -10,7 +10,6 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'seller-ser
 
 export async function sellerById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    console.log('kkt', req.params);
     const seller = await getSellerById(req.params.sellerId);
 
     if (!seller) {

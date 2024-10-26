@@ -1,5 +1,6 @@
 import express, { Express } from 'express';
 import { GateWayService } from '@gateway/server';
+import { redisConnection } from '@gateway/redis/redis.connection';
 
 class Application {
   public initialized(): void {
@@ -7,6 +8,7 @@ class Application {
 
     const gatewayServer: GateWayService = new GateWayService(app);
     gatewayServer.start();
+    redisConnection.createRedisConnection();
   }
 }
 

@@ -30,7 +30,7 @@ export async function verifyOTP(req: Request, res: Response, next: NextFunction)
     if (!user) {
       throw new BadRequestError('OTP is either invalid or expired.', 'auth-service verifyOTP method() error');
     }
-    await updateUserOTP(user.id!, '', new Date(), browserName, deviceType);
+    await updateUserOTP(user.id!, '', null, browserName, deviceType);
 
     const otpUpdateUser = await getUserByEmail(user.email!);
 

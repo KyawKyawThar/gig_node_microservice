@@ -3,6 +3,7 @@ import http from 'http';
 import { Logger } from 'winston';
 import { winstonLogger } from '@auth/logger';
 import { config } from '@auth/config';
+// import JWT from 'jsonwebtoken';
 import { Application, NextFunction, Request, Response, json, urlencoded } from 'express';
 import { verify } from 'jsonwebtoken';
 import { IAuthPayload } from '@auth/types/authTypes';
@@ -62,7 +63,7 @@ function securityMiddleware(app: Application): void {
 
       const payload = verify(token, config.JWT_SECRET) as IAuthPayload;
       req.currentUser = payload;
-      console.log('auth-service', req.url);
+      logger.info('auth-service', req.url);
     }
     next();
   });
@@ -89,7 +90,7 @@ async function startElasticSearch(): Promise<void> {
 
 function authErrorHandler(app: Application): void {
   app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.log('error', `Auth service ${error.comingFrom}`, error?.serializeError());
+    logger.error('error', `Auth service ${error.comingFrom}`, error?.serializeError());
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json(error?.serializeError());
     }
@@ -111,6 +112,6 @@ function startServer(app: Application): void {
       logger.log('error', 'Unhandled error:', err);
     });
   } catch (err) {
-    logger.log('error', 'Auth service startHTTPServer() method error: ', err);
+    logger.error('error', 'Auth service startHTTPServer() method error: ', err);
   }
 }

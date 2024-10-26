@@ -18,10 +18,6 @@ export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
       }
     }
 
-    //EMAIL_EXCHANGE_NAME=email-notification
-    // EMAIL_QUEUE_NAME=auth-email-queue
-    // EMAIL_ROUTING_KEY=auth-email-key
-
     await channel.assertExchange('email-notification', 'direct');
     const assertQueue = await channel.assertQueue('auth-email-queue', { durable: true, autoDelete: false });
     await channel.bindQueue('auth-email-queue', 'email-notification', 'auth-email-key');
@@ -31,7 +27,8 @@ export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
       //msg is coming from connection.publish from server.ts
 
       if (msg) {
-        const { receiverEmail, username, verifyLink, resetLink, template, otp } = JSON.parse(msg!.content.toString());
+        const { receiverEmail, username, template, verifyLink, resetLink, otp } = JSON.parse(msg!.content.toString());
+
         const mailTransport: mailTransport = {
           appLink: `${config.CLIENT_URL}`,
           appIcon: `${config.APP_ICON}`,

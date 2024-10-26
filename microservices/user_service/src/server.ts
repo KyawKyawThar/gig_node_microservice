@@ -17,10 +17,15 @@ import { checkConnection } from './elasticSearch';
 import { IErrorResponse } from './types/errorHandlerTypes';
 import { CustomError } from './errorHandler';
 import { createConnection } from '@user/queues/connection';
-import { consumeBuyerDirectMessage, consumeSellerDirectMessage } from '@user/queues/user.consumer';
+import {
+  consumeBuyerDirectMessage,
+  consumeReviewFanoutDirectMessage,
+  consumeSeedGigDirectMessage,
+  consumeSellerDirectMessage
+} from '@user/queues/user.consumer';
 import { StatusCodes } from 'http-status-codes';
 
-const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'userDataServer', 'debug');
+const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'user Service', 'debug');
 
 export const start = (app: Application): void => {
   startServer(app);
@@ -78,6 +83,8 @@ const startQueue = async () => {
   const userChannel = (await createConnection()) as Channel;
   await consumeBuyerDirectMessage(userChannel);
   await consumeSellerDirectMessage(userChannel);
+  await consumeReviewFanoutDirectMessage(userChannel);
+  await consumeSeedGigDirectMessage(userChannel);
 };
 
 const startElasticSearch = async (): Promise<void> => {
@@ -91,7 +98,7 @@ const userErrorHandler = (app: Application): void => {
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json(error?.serializeError());
     }
-    console.log('code is running here...', error.message);
+
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
     next();
   });

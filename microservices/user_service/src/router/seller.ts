@@ -2,7 +2,7 @@ import express, { Router } from 'express';
 import { sellerCreate } from '@user/controller/seller/create';
 import { randomSeller, sellerById, sellerByUsername } from '@user/controller/seller/get';
 import { sellerUpdate } from '@user/controller/seller/update';
-import { seed } from '@user/controller/seller/seed';
+import { seed } from '@user/controller/sellerSeed/seed';
 
 const router: Router = express.Router();
 

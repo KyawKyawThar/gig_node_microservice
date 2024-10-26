@@ -50,6 +50,7 @@ export async function emailTemplate(template: string, receiver: string, mailTran
       locals: mailTransport
     });
   } catch (err) {
+    console.log('emailTemplateError...');
     logger.error(err);
   }
 }

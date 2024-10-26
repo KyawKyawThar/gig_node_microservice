@@ -25,7 +25,7 @@ class AuthRoute {
     this.router.put('/auth/forget-password', password.forgetPassword);
     this.router.post('/auth/reset-password/:token', password.resetPassword);
     this.router.post('/auth/seed/:count', createAuthSeed.seed);
-    this.router.put('/auth/change-password', authMiddleware.checkAuthentication, password.changePassword);
+    this.router.put('/auth/change-password', authMiddleware.verifyUser, password.changePassword);
     return this.router;
   }
 }

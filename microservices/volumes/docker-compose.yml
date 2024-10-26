@@ -1,5 +1,6 @@
 services:
 #   filebeat will be implemented later
+#   disable authentication for elasticsearch and kibana
   elasticsearch:
     container_name: elasticsearch_container
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
@@ -7,14 +8,15 @@ services:
       - ES_JAVA_OPTS=${ES_JAVA_OPTS}
       - bootstrap.memory_lock=true
       - discovery.type=single-node
-      - network.host=0.0.0.0
-      - http.host=0.0.0.0
-      - transport.host=127.0.0.1
-      - xpack.security.enabled=true
+      # - network.host=0.0.0.0
+      # - http.host=0.0.0.0
+      # - transport.host=127.0.0.1
+      # - xpack.security.enabled=true
+      - xpack.security.enabled=false
       - xpack.security.authc.api_key.enabled=true
       - xpack.monitoring.collection.enabled=true
       - xpack.security.enrollment.enabled=true
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      # - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     ports:
       - "9300:9300"
       - "9200:9200"
@@ -46,9 +48,9 @@ services:
     image: docker.elastic.co/kibana/kibana:8.15.0
     environment:
       - ELASTICSEARCH_HOSTS=["http://elasticsearch_container:9200"]
-      - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=kibana
-      - XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS=["http://elasticsearch_container:9200"]
+      # - ELASTICSEARCH_USERNAME=kibana_system
+      # - ELASTICSEARCH_PASSWORD=kibana
+      # - XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS=["http://elasticsearch_container:9200"]
     networks:
       - elastic
     ports:
@@ -115,21 +117,21 @@ services:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USERNAME}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
 
-  heartbeat:
-    container_name: heartbeat_container
-    image:  docker.elastic.co/beats/heartbeat:8.15.0
-    user: root
-    hostname: heartbeat
-    # add capabilities for docker
-    cap_add:
-      - NET_RAW
-    volumes:
-      - ./heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro
-    networks:
-      - elastic
-    depends_on:
-      - elasticsearch
-    command: ["--strict.perms=false"]
+  # heartbeat:
+  #   container_name: heartbeat_container
+  #   image:  docker.elastic.co/beats/heartbeat:8.15.0
+  #   user: root
+  #   hostname: heartbeat
+  #   # add capabilities for docker
+  #   cap_add:
+  #     - NET_RAW
+  #   volumes:
+  #     - ./heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro
+  #   networks:
+  #     - elastic
+  #   depends_on:
+  #     - elasticsearch
+  #   command: ["--strict.perms=false"]
 
   mysql:
     container_name: mysql_container
@@ -177,6 +179,7 @@ services:
 
   mailhog:
     image: mailhog/mailhog:latest
+    platform: linux/amd64
     ports:
       - "1025:1025"
       - "8025:8025"

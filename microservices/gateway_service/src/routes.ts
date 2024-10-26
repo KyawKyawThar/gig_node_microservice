@@ -7,6 +7,7 @@ import { currentUserRoute } from '@gateway/router/currentUserRouter';
 import { searchRoute } from '@gateway/router/searchRouter';
 import { sellerRoute } from '@gateway/router/sellerRouter';
 import { buyerRoute } from '@gateway/router/buyerRouter';
+import { gigRoute } from '@gateway/router/gigRouter';
 
 export const appRoutes = (app: Application) => {
   app.use('', healthRoute.routes());
@@ -16,4 +17,5 @@ export const appRoutes = (app: Application) => {
   app.use(config.BASE_PATH, authMiddleware.verifyUser, currentUserRoute.routes());
   app.use(config.BASE_PATH, authMiddleware.verifyUser, sellerRoute.routes());
   app.use(config.BASE_PATH, authMiddleware.verifyUser, buyerRoute.routes());
+  app.use(config.BASE_PATH, authMiddleware.verifyUser, gigRoute.routes());
 };

@@ -1,4 +1,5 @@
 import { config } from '@auth/config';
+import { NotFoundError } from '@auth/errorHandler';
 import { winstonLogger } from '@auth/logger';
 import { gigByID, gigBySearch } from '@auth/services/search.service';
 import { IPaginateProps, ISearchResult } from '@auth/types/authTypes';
@@ -12,9 +13,11 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth-serve
 export async function singleElementByGig(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = await gigByID('gigs', req.params.gigId);
+    logger.info('singleElementByGig:', result);
     res.status(StatusCodes.OK).json({ message: 'Search gigs results', gig: result });
     logger.info('Single Element By Gig has been successfully');
   } catch (err) {
+    logger.info('Error in singleElementByGig: ', err);
     next(err);
   }
 }
@@ -22,7 +25,8 @@ export async function singleElementByGig(req: Request, res: Response, next: Next
 export async function gigs(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { type, size, from } = req.params;
-    console.log('authService gigs', { type, size, from });
+
+    logger.info('auth-service gigs search ', req.query);
     const paginate: IPaginateProps = { from, size: parseInt(`${size}`), type };
     const gigs: ISearchResult = await gigBySearch(
       `${req.query.query}`,
@@ -32,6 +36,9 @@ export async function gigs(req: Request, res: Response, next: NextFunction): Pro
       parseInt(`${req.query.maxPrice}`)
     );
 
+    if (!gigs.hits.length) {
+      throw new NotFoundError('There is no result for this search', 'gig-service sellerInactiveGigs() method: error');
+    }
     let resultHits = gigs.hits.map((item) => item._source);
 
     if (type === 'backward') {

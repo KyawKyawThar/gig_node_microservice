@@ -80,7 +80,6 @@ export async function seed(req: Request, res: Response, next: NextFunction): Pro
     }
     res.status(StatusCodes.CREATED).json({ message: 'Sellers created successfully' });
   } catch (error) {
-    console.log('error is:', error);
     next(error);
   }
 }

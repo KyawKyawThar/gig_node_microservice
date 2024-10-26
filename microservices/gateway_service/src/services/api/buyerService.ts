@@ -11,7 +11,6 @@ class BuyerService {
   }
 
   async email(): Promise<AxiosResponse> {
-    console.log('email function called');
     return await axiosBuyerInstance.get('/email');
   }
 

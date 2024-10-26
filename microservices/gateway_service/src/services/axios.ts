@@ -11,7 +11,7 @@ export class AxiosService {
     this.kkt = this.axiosCreateInstance(baseURL, serviceName);
   }
   public axiosCreateInstance(baseURL: string, serviceName?: string): AxiosInstance {
-    const requestGatewayToken = serviceName ? sign({ id: serviceName }, `${config.GATEWAY_JWT_TOKEN}`) : undefined;
+    const requestGatewayToken = sign({ id: serviceName }, `${config.GATEWAY_JWT_TOKEN}`);
 
     const instance: ReturnType<typeof axios.create> = axios.create({
       baseURL,
@@ -19,7 +19,7 @@ export class AxiosService {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        gatewayToken: requestGatewayToken
+        gatewaytoken: requestGatewayToken
       },
       withCredentials: true
     });

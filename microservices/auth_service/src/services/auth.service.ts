@@ -127,9 +127,12 @@ export async function updateVerifyEmail(
   emailVerificationToken?: string
 ): Promise<DatabaseError | void> {
   try {
-    await AuthModel.update(!emailVerificationToken ? { emailVerified } : { emailVerified, emailVerificationToken }, {
-      where: { id: authId }
-    });
+    await AuthModel.update(
+      !emailVerificationToken ? { emailVerified, emailVerificationToken: '' } : { emailVerified, emailVerificationToken },
+      {
+        where: { id: authId }
+      }
+    );
   } catch (error) {
     if (error instanceof DatabaseError) {
       return error;
@@ -203,17 +206,17 @@ export async function getUserByOTP(otp: string): Promise<IAuthDocument | Databas
 export async function updateUserOTP(
   authId: number,
   otp: string,
-  otpExpirationDate: Date,
-  browserName: string,
-  deviceType: string
+  otpExpirationDate: Date | null,
+  browserName?: string,
+  deviceType?: string
 ): Promise<DatabaseError | void> {
   try {
     await AuthModel.update(
       {
         otp,
         otpExpirationDate,
-        ...(browserName.length > 0 && { browserName }),
-        ...(deviceType.length > 0 && { deviceType })
+        ...(browserName!.length > 0 && { browserName }),
+        ...(deviceType!.length > 0 && { deviceType })
       },
       { where: { id: authId } }
     );
