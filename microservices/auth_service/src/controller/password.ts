@@ -26,7 +26,7 @@ export async function forgetPassword(req: Request, res: Response, next: NextFunc
     const result = await getUserByEmail(req.body.email);
 
     if (result instanceof DatabaseError) {
-      logger.error('SQL Error Message:', result.original.message);
+      logger.error(`SQL Error Message: ${result.original.message}`);
       throw new ServerError(result.original.message, 'auth-service forgetPassword method() error');
     }
 
@@ -83,7 +83,7 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
     const result = await getUserByPasswordToken(token);
 
     if (result instanceof DatabaseError) {
-      logger.error('SQL Error Message:', result.original.message);
+      logger.error(`SQL Error Message: ${result.original.message}`);
       throw new ServerError(result.original.message, 'auth-service resetPassword method() error');
     }
 
@@ -133,7 +133,7 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
     const result = await getUserByEmail(req.currentUser.email);
 
     if (result instanceof DatabaseError) {
-      logger.error('SQL Error Message:', result.original.message);
+      logger.error(`SQL Error Message: ${result.original.message}`);
       throw new ServerError(result.original.message, 'auth-service changePassword method() error');
     }
 

@@ -49,7 +49,7 @@ function securityMiddleware(app: Application): void {
   );
 
   const limiter = rateLimit({
-    max: 100,
+    limit: 100,
     windowMs: 60 * 60 * 1000,
     standardHeaders: 'draft-7',
     message: 'Too many requests from this IP, please try again in an hour!'
@@ -90,7 +90,7 @@ async function startElasticSearch(): Promise<void> {
 
 function authErrorHandler(app: Application): void {
   app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.error('error', `Auth service ${error.comingFrom}`, error?.serializeError());
+    logger.log('error', `Auth service ${error.comingFrom}`, error?.serializeError());
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json(error?.serializeError());
     }
@@ -112,6 +112,6 @@ function startServer(app: Application): void {
       logger.log('error', 'Unhandled error:', err);
     });
   } catch (err) {
-    logger.error('error', 'Auth service startHTTPServer() method error: ', err);
+    logger.log('error', 'Auth service startHTTPServer() method error: ', err);
   }
 }

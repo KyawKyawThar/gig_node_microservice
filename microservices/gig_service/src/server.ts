@@ -44,7 +44,7 @@ async function startElasticSearch() {
 }
 
 function securityMiddleware(app: Application) {
-  app.set('truest proxy', 1);
+  app.set('trust proxy', 1);
   app.use(hpp());
   app.use(helmet());
   app.use(
@@ -56,7 +56,7 @@ function securityMiddleware(app: Application) {
   );
 
   const limiter = rateLimit({
-    max: 100,
+    limit: 100,
     windowMs: 60 * 60 * 1000,
     standardHeaders: 'draft-7',
     message: 'Too many requests from this IP, please try again an hour!'
@@ -86,7 +86,7 @@ function routerMiddleware(app: Application) {
 
 function gigErrorHandler(app: Application) {
   app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.error('error', `Gig service ${err.comingFrom}`);
+    logger.error(`Gig service gigErrorHandler ${err.comingFrom}`);
 
     if (err instanceof CustomError) {
       return res.status(err.statusCode).json(err?.serializeError());
@@ -108,6 +108,6 @@ function startServer(app: Application) {
       logger.log('error', 'Unhandled error:', err);
     });
   } catch (error) {
-    logger.error('error', 'Gig service startServer() method error:', error);
+    logger.log('error', 'Gig service startServer() method error:', error);
   }
 }

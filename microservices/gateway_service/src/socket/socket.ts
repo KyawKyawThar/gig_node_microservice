@@ -1,11 +1,14 @@
-// import { Logger } from 'winston';
-// import { winstonLogger } from '@gateway/logger';
-// import { config } from '@gateway/config';
+import { Logger } from 'winston';
+import { winstonLogger } from '@gateway/logger';
+import { config } from '@gateway/config';
 import { gatewayCache } from '@gateway/redis/redis.cache';
 import { Server, Socket } from 'socket.io';
+import { io, Socket as SocketClient } from 'socket.io-client';
+import { IMessageDocuments } from '@gateway/types/chatInterface';
 
-//const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway server', 'debug');
+const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway server', 'debug');
 
+let chatSocketClient: SocketClient;
 export class SocketIOAppHandler {
   private gateWayCache: typeof gatewayCache;
   private io: Server;
@@ -13,6 +16,7 @@ export class SocketIOAppHandler {
   constructor(io: Server) {
     this.io = io;
     this.gateWayCache = gatewayCache;
+    this.checkSocketIOPrivateConnection();
   }
 
   public listen(): void {
@@ -35,6 +39,32 @@ export class SocketIOAppHandler {
         const response = await this.gateWayCache.getLoggedInUsersFromCache('getLoggedInUser');
         this.io.emit('online', response);
       });
+    });
+  }
+  private checkSocketIOPrivateConnection(): void {
+    chatSocketClient = io(config.MESSAGE_BASE_URL, {
+      secure: true,
+      transports: ['websocket', 'polling']
+    });
+
+    chatSocketClient.on('connect', () => {
+      logger.info('Chat service socket connected');
+    });
+
+    chatSocketClient.on('disconnect', (error: SocketClient.DisconnectReason) => {
+      logger.log('error', 'Chat socket disconnected error', error);
+      chatSocketClient.connect();
+    });
+
+    chatSocketClient.on('connect_error', (error: Error) => {
+      logger.log('error', 'Chat socket disconnected error', error);
+      chatSocketClient.connect();
+    });
+
+    //custom events
+    chatSocketClient.on('message received', (message: IMessageDocuments) => {
+      logger.info('gateway sockets chatSocketClient received message', message);
+      this.io.emit('message received', message);
     });
   }
 }

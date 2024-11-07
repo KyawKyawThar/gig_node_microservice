@@ -25,6 +25,7 @@ function createConfig(): Config {
     ELASTIC_SEARCH_URL: process.env.ELASTIC_SEARCH_URL!,
     CLIENT_BASE_URL: process.env.CLIENT_BASE_URL!,
     AUTH_BASE_URL: process.env.AUTH_BASE_URL!,
+    MESSAGE_BASE_URL: process.env.MESSAGE_BASE_URL!,
     GATEWAY_JWT_TOKEN: process.env.GATEWAY_JWT_TOKEN!,
     GIG_BASE_URL: process.env.GIG_BASE_URL!,
     JWT_SECRET: process.env.JWT_SECRET!,

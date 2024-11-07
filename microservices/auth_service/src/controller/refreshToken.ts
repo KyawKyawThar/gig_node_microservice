@@ -16,7 +16,7 @@ export async function refreshToken(req: Request, res: Response, next: NextFuncti
     const result = await getUserByUsername(req.params.username);
 
     if (result instanceof DatabaseError) {
-      logger.error('SQL Error Message:', result.original.message);
+      logger.error(`SQL Error Message: ${result.original.message}`);
       throw new ServerError(result.original.message, 'auth-service verifyOTP method() error');
     }
     const checkExistingUser = result as IAuthDocument;

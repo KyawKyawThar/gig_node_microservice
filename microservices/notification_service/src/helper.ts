@@ -50,7 +50,6 @@ export async function emailTemplate(template: string, receiver: string, mailTran
       locals: mailTransport
     });
   } catch (err) {
-    console.log('emailTemplateError...');
-    logger.error(err);
+    logger.error(`got a error from emailTemplate() method: ${err}`);
   }
 }

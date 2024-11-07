@@ -18,7 +18,7 @@ export async function verifyEmail(req: Request, res: Response, next: NextFunctio
     const result = await getUserByEmailVerifyToken(token);
 
     if (result instanceof DatabaseError) {
-      logger.error('SQL Error Message:', result.original.message);
+      logger.error(`SQL Error Message: ${result.original.message}`);
       throw new ServerError(result.original.message, 'auth-service verifyOTP method() error');
     }
     const checkUserIfExists = result as IAuthDocument;

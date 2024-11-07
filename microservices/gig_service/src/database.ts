@@ -10,7 +10,7 @@ export const databaseConnection = async (): Promise<void> => {
     await mongoose.connect(config.DATABASE_URL);
     logger.info('Gig service successfully connected to database....');
   } catch (err) {
-    logger.error('Gig service- Unable to connect to database', err);
+    logger.error('Gig service- Unable to connect to database');
     logger.log('error', 'auth service databaseConnection method error', err);
   }
 };

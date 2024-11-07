@@ -22,6 +22,7 @@ import { Server } from 'socket.io';
 import { createClient } from 'redis';
 import { SocketIOAppHandler } from '@gateway/socket/socket';
 import { createAdapter } from '@socket.io/redis-adapter';
+import { axiosChatInstance } from './services/api/chatService';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway server', 'debug');
 
@@ -69,6 +70,7 @@ export class GateWayService {
         axiosBuyerInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
         axiosSellerInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
         axiosGigInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
+        axiosChatInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
       }
 
       next();
@@ -97,7 +99,7 @@ export class GateWayService {
     app.use('*', (req: Request, res: Response, next: NextFunction) => {
       const fullURL = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
-      logger.log('error', `${fullURL} endpoint is not valid`);
+      logger.error(`gateway service: ${fullURL} endpoint is not valid`);
 
       res.status(HttpStatusCode.BadRequest).json({ message: 'The end point called does not exist' });
       next();

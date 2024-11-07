@@ -20,7 +20,7 @@ export async function checkConnection(): Promise<void> {
       logger.info(`Auth Service ElasticSearch health check - ${health.status}`);
       isConnected = true;
     } catch (err) {
-      logger.error('error', 'Auth Service checkConnection() method:', err);
+      logger.log('error', 'Auth Service checkConnection() method:', err);
     }
   }
 }
@@ -39,10 +39,10 @@ export async function createIndex(indexName: string): Promise<void> {
       await elasticSearchClient.indices.refresh({ index: indexName });
       logger.info(`created index "${indexName}"`);
     } else {
-      logger.info(`Index ${indexName} is already exists`);
+      logger.error(`Index ${indexName} is already exists`);
     }
   } catch (error) {
-    logger.info(`An error occurred while creating ${indexName} index`);
+    logger.error(`An error occurred while creating ${indexName} index`);
     logger.log('error', 'Auth Service checkConnection() method:', error);
   }
 }
