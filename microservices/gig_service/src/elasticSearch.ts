@@ -19,7 +19,7 @@ export async function checkConnection(): Promise<void> {
       logger.info(`Gig Service ElasticSearch health check - ${health.status}`);
       isConnected = true;
     } catch (error) {
-      logger.error('error', 'Gig service checkConnection() method', error);
+      logger.log('error', 'Gig service checkConnection() method error', error);
     }
   }
 }
@@ -46,7 +46,7 @@ export async function getDocumentCount(index: string): Promise<number> {
     const result = await elasticSearchClient.count({ index });
     return result.count;
   } catch (error) {
-    logger.error('error', 'GigService elasticsearch getDocumentCount() method error:', error);
+    logger.log('error', 'GigService elasticsearch getDocumentCount() method error:', error);
     return 0;
   }
 }
@@ -55,7 +55,7 @@ export async function getIndexData(index: string, indexId: string): Promise<ISel
     const result = await elasticSearchClient.get({ index, id: indexId });
     return result._source as ISellerGig;
   } catch (error) {
-    logger.error('error', 'GigService elasticsearch getIndexData() method error:', error);
+    logger.log('error', 'GigService elasticsearch getIndexData() method error:', error);
     return {} as ISellerGig;
   }
 }
@@ -63,20 +63,20 @@ export async function addIndexData(indexName: string, indexId: string, gigDocume
   try {
     await elasticSearchClient.index({ index: indexName, id: indexId, document: gigDocument });
   } catch (error) {
-    logger.error('error', 'GigService elasticsearch addIndexData() method error:', error);
+    logger.log('error', 'GigService elasticsearch addIndexData() method error:', error);
   }
 }
 export async function updateIndexData(indexName: string, indexId: string, gigDocument: unknown): Promise<void> {
   try {
     await elasticSearchClient.update({ index: indexName, id: indexId, doc: gigDocument });
   } catch (error) {
-    logger.error('error', 'GigService elasticsearch updateIndexData() method error:', error);
+    logger.log('error', 'GigService elasticsearch updateIndexData() method error:', error);
   }
 }
 export async function deleteIndexData(indexName: string, indexId: string): Promise<void> {
   try {
     await elasticSearchClient.delete({ index: indexName, id: indexId });
   } catch (error) {
-    logger.error('error', 'GigService elasticsearch deleteIndexData() method error:', error);
+    logger.log('error', 'GigService elasticsearch deleteIndexData() method error:', error);
   }
 }

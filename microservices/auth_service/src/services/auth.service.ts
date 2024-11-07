@@ -43,7 +43,7 @@ export async function createUser(data: IAuthDocument): Promise<IAuthDocument | D
     return userData;
   } catch (error) {
     if (error instanceof DatabaseError) {
-      logger.error('SQL Error Message:', error.original);
+      // logger.error('SQL Error Message:', error.original);
       return error;
     }
   }

@@ -20,5 +20,5 @@ export const createRedisConnection = async () => {
 };
 
 const castError = () => {
-  client.on('error', (err: unknown) => logger.error('Redis Client Error', err));
+  client.on('error', (err: unknown) => logger.log('error', 'Redis Client Error', err));
 };

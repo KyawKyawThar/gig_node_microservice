@@ -29,7 +29,7 @@ export async function signUp(req: Request, res: Response, next: NextFunction): P
     const user = await getUserByEmailORUsername(username, email);
 
     if (user instanceof DatabaseError) {
-      logger.error('SQL Error Message:', user.original.message);
+      logger.error(`SQL Error Message:${user.original.message}`);
       throw new ServerError(user.original.message, 'auth-service signUp create() method error');
     }
 
@@ -65,7 +65,7 @@ export async function signUp(req: Request, res: Response, next: NextFunction): P
     const newUser = await createUser(data);
 
     if (newUser instanceof DatabaseError) {
-      logger.error('SQL Error Message:', newUser.original.message);
+      logger.error(`SQL Error Message:${newUser.original.message}`);
       throw new ServerError(newUser.original.message, 'auth-service verifyOTP method() error');
     }
 

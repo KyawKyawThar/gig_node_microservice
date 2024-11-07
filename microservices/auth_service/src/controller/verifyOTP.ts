@@ -21,7 +21,7 @@ export async function verifyOTP(req: Request, res: Response, next: NextFunction)
     const result = await getUserByOTP(otp);
 
     if (result instanceof DatabaseError) {
-      logger.error('SQL Error Message:', result.original.message);
+      logger.error(`SQL Error Message:${result.original.message}`);
       throw new ServerError(result.original.message, 'auth-service verifyOTP method() error');
     }
 
@@ -35,7 +35,7 @@ export async function verifyOTP(req: Request, res: Response, next: NextFunction)
     const otpUpdateUser = await getUserByEmail(user.email!);
 
     if (otpUpdateUser instanceof DatabaseError) {
-      logger.error('SQL Error Message:', otpUpdateUser.original.message);
+      logger.error(`SQL Error Message: ${otpUpdateUser.original.message}`);
       throw new ServerError(otpUpdateUser.original.message, 'auth-service verifyOTP method() error');
     }
 

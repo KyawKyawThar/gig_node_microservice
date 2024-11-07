@@ -37,7 +37,7 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
     const result = isValid ? await getUserByEmail(email) : await getUserByUsername(email);
 
     if (result instanceof DatabaseError) {
-      logger.error('SQL Error Message:', result.original.message);
+      logger.error(`SQL Error Message: ${result.original.message}`);
       throw new ServerError(result.original.message, 'auth-service verifyOTP method() error');
     }
     const existingUser = result as IAuthDocument;

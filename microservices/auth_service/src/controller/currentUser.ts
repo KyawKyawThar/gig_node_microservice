@@ -19,7 +19,7 @@ export async function currentUser(req: Request, res: Response, next: NextFunctio
     const result = await getUserByID(req.currentUser.id);
 
     if (result instanceof DatabaseError) {
-      logger.error('SQL Error Message:', result.original.message);
+      logger.error(`SQL Error Message: ${result.original.message}`);
       throw new ServerError(result.original.message, 'auth-service currentUser method() error');
     }
 
@@ -43,7 +43,7 @@ export async function resendEmail(req: Request, res: Response, next: NextFunctio
     const result = await getUserByEmail(email.toLowerCase());
 
     if (result instanceof DatabaseError) {
-      logger.error('SQL Error Message:', result.original.message);
+      logger.error(`SQL Error Message: ${result.original.message}`);
       throw new ServerError(result.original.message, 'auth-service resendEmail method() error');
     }
     const user = result as IAuthDocument;

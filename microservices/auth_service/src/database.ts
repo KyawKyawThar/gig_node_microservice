@@ -25,7 +25,7 @@ export async function databaseConnection(): Promise<void> {
     await sequelize.authenticate();
     logger.info('AuthService MySQL Database Connection established successfully');
   } catch (e) {
-    logger.error('error', 'auth service databaseConnection method error', e);
+    logger.log('error', 'auth service databaseConnection method error', e);
   }
 }
 
@@ -35,7 +35,7 @@ process.on('SIGINT', async () => {
     logger.info('AuthService MySQL Database Connection closed gracefully');
     process.exit(0);
   } catch (e) {
-    logger.error('Error closing database connection', e);
+    logger.log('Error closing database connection', e);
     process.exit(1);
   }
 });
