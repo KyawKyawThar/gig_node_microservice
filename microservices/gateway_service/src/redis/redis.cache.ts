@@ -20,7 +20,7 @@ class GatewayCache {
       }
       await this.client.SET(key, value);
     } catch (error) {
-      logger.error('error', 'GatewayService Cache saveUserSelectedCategory() method error:', error);
+      logger.log('error', 'GatewayService Cache saveUserSelectedCategory() method error:', error);
     }
   }
 
@@ -40,7 +40,7 @@ class GatewayCache {
 
       return response;
     } catch (error) {
-      logger.error('error', 'GatewayService Cache saveLoggedInUserToCache() method error:', error);
+      logger.log('error', 'GatewayService Cache saveLoggedInUserToCache() method error:', error);
       return [];
     }
   }
@@ -56,7 +56,7 @@ class GatewayCache {
       const response: string[] = await this.client.LRANGE(key, 0, -1);
       return response;
     } catch (error) {
-      logger.error('error', 'GatewayService Cache removeLoggedInUserFromCache() method error:', error);
+      logger.log('error', 'GatewayService Cache removeLoggedInUserFromCache() method error:', error);
       return [];
     }
   }
@@ -68,7 +68,7 @@ class GatewayCache {
       const response: string[] = await this.client.LRANGE(key, 0, -1);
       return response;
     } catch (error) {
-      logger.error('error', 'GatewayService Cache getLoggedInUsersFromCache() method error:', error);
+      logger.log('error', 'GatewayService Cache getLoggedInUsersFromCache() method error:', error);
       return [];
     }
   }

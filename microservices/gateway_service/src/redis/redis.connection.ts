@@ -23,7 +23,7 @@ class RedisConnection {
     }
   }
   private castError() {
-    this.client.on('error', (err: unknown) => logger.error('Redis Client Error', err));
+    this.client.on('error', (err: unknown) => logger.log('error', 'Redis Client Error', err));
   }
 }
 

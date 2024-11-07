@@ -6,6 +6,7 @@ export interface Config {
   CLIENT_BASE_URL: string;
   AUTH_BASE_URL: string;
   GIG_BASE_URL: string;
+  MESSAGE_BASE_URL: string;
   GATEWAY_JWT_TOKEN: string;
   JWT_SECRET: string;
   SECRET_KEY_ONE: string;

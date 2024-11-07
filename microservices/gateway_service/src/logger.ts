@@ -28,10 +28,10 @@ export const winstonLogger = (elasticsearchNode: string, name: string, level: st
 
   const esTransport: ElasticsearchTransport = new ElasticsearchTransport(options.elasticSearch);
 
-  const errorLogFormat = winston.format.combine(winston.format.timestamp(), winston.format.json());
+  const logFormat = winston.format.combine(winston.format.timestamp(), winston.format.json());
 
-  const infoLogFormat = winston.format.combine(winston.format.timestamp(), winston.format.json());
-  const infoOnlyFilter = winston.format((info) => {
+  // const infoLogFormat = winston.format.combine(winston.format.timestamp(), winston.format.json());
+  const infoOnlyLog = winston.format((info) => {
     return info.level === 'info' ? info : false;
   });
 
@@ -42,13 +42,13 @@ export const winstonLogger = (elasticsearchNode: string, name: string, level: st
     transports: [
       new winston.transports.Console(options.console),
       new winston.transports.File({
-        filename: './src/log/auth-service-error.log',
+        filename: './src/log/gateway-service-error.log',
         level: 'error', // Log errors only
-        format: errorLogFormat
+        format: logFormat
       }),
       new winston.transports.File({
-        filename: './src/log/auth-service-info.log',
-        format: winston.format.combine(infoOnlyFilter(), infoLogFormat)
+        filename: './src/log/gateway-service-info.log',
+        format: winston.format.combine(infoOnlyLog(), logFormat)
       }),
       esTransport
     ]
