@@ -1,4 +1,5 @@
 import http from 'http';
+import { EventEmitter } from 'events';
 
 import { Application, json, urlencoded, Request, Response, NextFunction } from 'express';
 import { Logger } from 'winston';
@@ -19,14 +20,12 @@ import { axiosBuyerInstance } from '@gateway/services/api/buyerService';
 import { axiosSellerInstance } from '@gateway/services/api/sellerService';
 import { axiosGigInstance } from '@gateway/services/api/gigService';
 import { Server } from 'socket.io';
-import { createClient } from 'redis';
-import { SocketIOAppHandler } from '@gateway/socket/socket';
-import { createAdapter } from '@socket.io/redis-adapter';
-import { axiosChatInstance } from './services/api/chatService';
+import { axiosChatInstance } from '@gateway/services/api/chatService';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway server', 'debug');
 
 export let socketIO: Server;
+
 export class GateWayService {
   private readonly app: Application;
 
@@ -140,38 +139,58 @@ export class GateWayService {
 
   private async startServer(app: Application): Promise<void> {
     try {
+      const emitter = new EventEmitter();
+      logger.info('info', `get event max listener: ${emitter.getMaxListeners()}`);
       const httpServer: http.Server = new http.Server(app);
-      const socketIO = await this.createSocketIOServer(httpServer);
+      logger.log('info', 'HTTP Server created successfully');
+      //const socketServer = await this.createSocketIOServer(httpServer);
+      //logger.log('info', 'Socket.IO Server created successfully', socketServer);
+
       await this.startHTTPServer(httpServer);
-      this.socketIOConnection(socketIO);
+      logger.log('info', 'HTTP Server started successfully');
+
+      // this.socketIOConnection(socketServer);
+      // logger.log('info', 'Socket.IO Connection initialized');
     } catch (err) {
       logger.log('error', 'Gateway service startServer() method error: ', err);
     }
   }
 
-  private async createSocketIOServer(httpServer: http.Server): Promise<Server> {
-    const io: Server = new Server(httpServer, {
-      cors: {
-        origin: `${config.CLIENT_BASE_URL}`,
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-      }
-    });
-    const pubClient = createClient({ url: config.REDIS_HOST });
-    const subClient = pubClient.duplicate();
-    await Promise.all([pubClient.connect(), subClient.connect()]);
-    io.adapter(createAdapter(pubClient, subClient));
-    socketIO = io;
-    return io;
-  }
+  //createSocketIOServer will add after Client URL is established
+  // private async createSocketIOServer(httpServer: http.Server): Promise<Server> {
+  //   try {
+  //     const io: Server = new Server(httpServer, {
+  //       cors: {
+  //         origin: `${config.CLIENT_BASE_URL}`,
+  //         credentials: true,
+  //         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+  //       }
+  //     });
+  //     pubClient = createClient({ url: config.REDIS_HOST });
+  //     subClient = pubClient.duplicate();
+  //     Promise.all([pubClient.connect(), subClient.connect()]);
+  //     io.adapter(createAdapter(pubClient, subClient));
+  //     socketIO = io;
 
-  private socketIOConnection(io: Server): void {
-    const socketIOHandler = new SocketIOAppHandler(io);
-    socketIOHandler.listen();
-  }
+  //     return io;
+  //   } catch (error) {
+  //     console.error('Failed to initialize Socket.IO server:', error);
+
+  //     if (pubClient && pubClient.isOpen) {
+  //       await pubClient.disconnect();
+  //     }
+
+  //     if (subClient && subClient.isOpen) {
+  //       await subClient.disconnect();
+  //     }
+
+  //     throw new Error('Socket.IO server Redis initialization failed');
+  //   }
+  // }
 
   private async startHTTPServer(httpServer: http.Server): Promise<void> {
     try {
+      //  process.setMaxListeners(20);
       logger.info(`Gateway service has started with process id ${process.pid}`);
       httpServer.listen(config.GATEWAY_SERVER_PORT, () => {
         logger.info(`Gateway service is running on port: ${config.GATEWAY_SERVER_PORT}`);
@@ -183,4 +202,9 @@ export class GateWayService {
       logger.log('error', 'Gateway service startHTTPServer() method error: ', err);
     }
   }
+
+  // private socketIOConnection(io: Server): void {
+  //   const adapter = new SocketIOAppHandler(io);
+  //   adapter.listen();
+  // }
 }

@@ -12,13 +12,13 @@ export async function checkConnection(): Promise<void> {
 
   while (!isConnected) {
     logger.info('ChatService connecting to ElasticSearch.....');
-  }
 
-  try {
-    const health = await elasticSearchClient.cluster.health({});
-    logger.info(`ChatService ElasticSearch health check- ${health.status}`);
-    isConnected = true;
-  } catch (error) {
-    logger.log('error', 'Chat service checkConnection() method error', error);
+    try {
+      const health = await elasticSearchClient.cluster.health({});
+      logger.info(`ChatService ElasticSearch health check- ${health.status}`);
+      isConnected = true;
+    } catch (error) {
+      logger.log('error', 'Chat service checkConnection() method error', error);
+    }
   }
 }

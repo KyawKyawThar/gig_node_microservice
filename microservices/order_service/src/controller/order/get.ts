@@ -3,7 +3,6 @@ import { winstonLogger } from '@order/logger';
 import { config } from '@order/config';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { orderModel } from '@order/models/order.schema';
 import { getOrderByOrderId, getOrderBySellerId } from '@order/services/order.service';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'order_service', 'debug');
