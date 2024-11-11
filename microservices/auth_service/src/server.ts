@@ -3,7 +3,6 @@ import http from 'http';
 import { Logger } from 'winston';
 import { winstonLogger } from '@auth/logger';
 import { config } from '@auth/config';
-// import JWT from 'jsonwebtoken';
 import { Application, NextFunction, Request, Response, json, urlencoded } from 'express';
 import { verify } from 'jsonwebtoken';
 import { IAuthPayload } from '@auth/types/authTypes';

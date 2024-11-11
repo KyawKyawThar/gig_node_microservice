@@ -1,27 +1,27 @@
-import { Logger } from 'winston';
-import { winstonLogger } from './logger';
-import { config } from './config';
-import { Application, NextFunction, Request, Response, json, urlencoded } from 'express';
-import { Server } from 'socket.io';
+import http from 'http';
+
 import { Channel } from 'amqplib';
+import { Server } from 'socket.io';
+import { config } from './config';
+import { winstonLogger } from './logger';
+import { Application, NextFunction, Request, Response, json, urlencoded } from 'express';
+import { verify } from 'jsonwebtoken';
 import hpp from 'hpp';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import { verify } from 'jsonwebtoken';
-import { IAuthPayload } from './types/chatTypes';
-import compression from 'compression';
-import { IErrorResponse } from './types/errorHandlerTypes';
-import { CustomError } from './errorHandler';
-import http from 'http';
-import { createConnection } from './queue/connection';
+import { IOrderPayload } from './types/orderTypes';
 import { checkConnection } from './elasticSearch';
+import { createConnection } from './queue/connection';
+import compression from 'compression';
 import { appRoutes } from './route';
+import { IError } from './types/errorHandlerTypes';
+import { CustomError } from './errorHandler';
 
-const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'chatService', 'debug');
+const logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'orderService', 'debug');
 
 export let socketIOChatObject: Server;
-export let chatChannel: Channel;
+export let orderChannel: Channel;
 
 export function start(app: Application) {
   startQueue();
@@ -30,7 +30,7 @@ export function start(app: Application) {
   securityMiddleware(app);
   standardMiddleware(app);
   routerMiddleware(app);
-  chatErrorHandler(app);
+  orderErrorHandler(app);
   startServer(app);
 }
 
@@ -58,20 +58,19 @@ function securityMiddleware(app: Application) {
   app.use(async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     if (req.headers?.authorization && req.headers?.authorization.startsWith('Bearer')) {
       const token = req.headers?.authorization.split(' ')[1];
-      const payload = verify(token, config.JWT_SECRET) as IAuthPayload;
+      const payload = verify(token, config.JWT_SECRET) as IOrderPayload;
       req.currentUser = payload;
     }
 
     next();
   });
 }
-
 async function startElasticSearch() {
   await checkConnection();
 }
 
 async function startQueue() {
-  chatChannel = (await createConnection()) as Channel;
+  orderChannel = (await createConnection()) as Channel;
 }
 
 function standardMiddleware(app: Application) {
@@ -83,10 +82,9 @@ function standardMiddleware(app: Application) {
 function routerMiddleware(app: Application) {
   appRoutes(app);
 }
-
-function chatErrorHandler(app: Application) {
-  app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.error(`chat service chatErrorHandler ${err.comingFrom}`);
+function orderErrorHandler(app: Application) {
+  app.use((err: IError, _req: Request, res: Response, next: NextFunction) => {
+    logger.error(`order server orderErrorHandler ${err.comingFrom}`);
     if (err instanceof CustomError) {
       return res.status(err.statusCode).json(err?.serializeError());
     }
@@ -101,10 +99,9 @@ function startServer(app: Application): void {
     socketIOChatObject = socketServer;
     startHttpServer(server);
   } catch (error) {
-    logger.log('error', 'chat service startServer() method error', error);
+    logger.log('error', 'order service startServer() method error', error);
   }
 }
-
 function createSockIOServer(httpServer: http.Server): Server {
   const io = new Server(httpServer, {
     cors: {
@@ -118,15 +115,16 @@ function createSockIOServer(httpServer: http.Server): Server {
 
 function startHttpServer(server: http.Server): void {
   try {
-    logger.info(`chat server has started with process id ${process.pid}`);
-    server.listen(config.CHAT_SERVER_PORT, () => {
-      logger.info(`Chat server is running on port ${config.CHAT_SERVER_PORT}`);
+    logger.info(`order server has started with process id ${process.pid}`);
+
+    server.listen(config.ORDER_BASE_PATH, () => {
+      logger.info(`Order server is running on port ${config.ORDER_SERVER_PORT}`);
     });
 
-    process.once('uncaughtException', (error) => {
+    process.on('uncaughtException', (error) => {
       logger.log('error', 'Unhandled error: ', error);
     });
   } catch (error) {
-    logger.log('error', 'chat service startHttpServer() method error:', error);
+    logger.log('error', 'order service startHttpServer() method error:', error);
   }
 }
