@@ -9,8 +9,10 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'chat_servi
 export const offer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { messageId, type } = req.body;
+
     const result = await updateOffer(messageId, type);
-    res.status(StatusCodes.OK).json({ message: 'Message updated', singleMessage: result });
+
+    res.status(StatusCodes.OK).json({ message: 'Offer updated successfully', offerUpdate: result });
     logger.info('chat_service offer updated successfully');
   } catch (error) {
     next(error);
@@ -19,6 +21,8 @@ export const offer = async (req: Request, res: Response, next: NextFunction): Pr
 export const markMultipleMessages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { messageId, senderUsername, receiverUsername } = req.body;
+
+    console.log('mark-multiple-as-read called...');
     await markManyMessagesAsRead(messageId, senderUsername, receiverUsername);
     res.status(StatusCodes.OK).json({ message: 'Messages marked as read' });
     logger.info('chat_service  markMultipleMessages successfully.');

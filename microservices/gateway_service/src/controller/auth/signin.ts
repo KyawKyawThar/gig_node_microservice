@@ -12,11 +12,9 @@ class SignIn {
     try {
       const response: AxiosResponse = await authService.signIn(req.body);
 
-      const test = response.data;
-      console.log('read signIn: ' + test);
       const { message, user, token, browserName, deviceType } = response.data;
 
-      console.log('final ', user, token);
+      console.log('final ', token);
       req.session = { jwt: token };
 
       // res.cookie('refreshToken', refreshToken, {

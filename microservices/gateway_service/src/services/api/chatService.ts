@@ -20,7 +20,7 @@ class ChatService {
     return await axiosChatInstance.get(`/${senderUsername}/${receiverUsername}`);
   }
   async getConversationList(username: string): Promise<AxiosResponse> {
-    return await axiosChatInstance.get(`/conversations/${username}`);
+    return await axiosChatInstance.get(`/conversations/list/${username}`);
   }
 
   async getUserMessages(conversationId: string): Promise<AxiosResponse> {
@@ -32,11 +32,11 @@ class ChatService {
   }
 
   async updateOffer(body: { messageId: string; type: string }): Promise<AxiosResponse> {
-    return await axiosChatInstance.put(`/offer/${body}`);
+    return await axiosChatInstance.put('/offer', body);
   }
 
   async markSingleMessage(messageId: string): Promise<AxiosResponse> {
-    return await axiosChatInstance.put(`/mark-as-read/${messageId}`);
+    return await axiosChatInstance.put('/mark-as-read/', { messageId });
   }
 
   async markMultipleMessages(messageId: string, senderUsername: string, receiverUsername: string): Promise<AxiosResponse> {

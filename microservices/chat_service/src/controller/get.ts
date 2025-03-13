@@ -31,6 +31,7 @@ export const messages = async (req: Request, res: Response, next: NextFunction):
 export const conversationList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { username } = req.params;
+    console.log('conversationList', username);
     const result = await getUserConversationList(username);
     res.status(StatusCodes.OK).json({ message: 'get conversation list', conversationList: result });
     logger.info('chat_service get conversationList successfully');

@@ -61,7 +61,6 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
     };
 
     if (!req.body.hasConversationId) {
-      console.log('data is : ', data);
       await createConversation(data.conversationId, data?.senderUsername!, data?.receiverUsername!);
     }
 

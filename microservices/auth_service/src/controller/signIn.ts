@@ -4,12 +4,11 @@ import { AuthModel } from '@auth/models/auth.schema';
 import { publicDirectMessage } from '@auth/queues/auth.producer';
 import { signInSchema } from '@auth/schemes/signin';
 import { authChannel } from '@auth/server';
-import { getUserByEmail, getUserByUsername, signToken, updateUserOTP, userRefreshToken } from '@auth/services/auth.service';
+import { getUserByEmail, getUserByUsername, signToken, updateUserOTP } from '@auth/services/auth.service';
 import { IAuthDocument, IEmailMessageDetails } from '@auth/types/authTypes';
 import { StatusCodes } from 'http-status-codes';
 import { omit } from 'lodash';
 import { DatabaseError } from 'sequelize';
-
 import { config } from '@auth/config';
 import { winstonLogger } from '@auth/logger';
 import { Logger } from 'winston';
@@ -64,7 +63,7 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
     }
 
     let userJWT: string = '';
-    let refreshToken: string = '';
+    //let refreshToken: string = '';
     let userData: IAuthDocument | null = null;
     let message: string = 'User login successfully';
     let userBrowserName: string = '';
@@ -96,7 +95,7 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
       await updateUserOTP(existingUser.id!, `${otpCode}`, otpExpirationDate, '', '');
     } else {
       userJWT = signToken(existingUser.id!, existingUser.username!, existingUser.email!);
-      refreshToken = userRefreshToken(result.id!, result.username!, result.email!);
+      // refreshToken = userRefreshToken(result.id!, result.username!, result.email!);
       userData = omit(existingUser, ['password']);
     }
 
@@ -105,8 +104,8 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
       user: userData,
       token: userJWT,
       browserName: userBrowserName,
-      deviceType: userDeviceType,
-      refreshToken
+      deviceType: userDeviceType
+      // refreshToken
     });
     logger.info('User signed in successfully..');
   } catch (err) {
