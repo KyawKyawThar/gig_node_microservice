@@ -12,7 +12,7 @@ export class Create {
     try {
       const response = await gigService.createGig(req.body);
       logger.info(response.data.message);
-      res.status(StatusCodes.OK).json({ message: response.data.message, gig: response.data.gig });
+      res.status(StatusCodes.OK).json({ message: response.data.message, gig: response.data.result });
     } catch (error) {
       next(error);
     }

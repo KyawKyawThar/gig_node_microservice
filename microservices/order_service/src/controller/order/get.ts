@@ -3,7 +3,7 @@ import { winstonLogger } from '@order/logger';
 import { config } from '@order/config';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { getOrderByOrderId, getOrderBySellerId } from '@order/services/order.service';
+import { getOrderByOrderId, getOrderBySellerId, getOrdersByBuyerId } from '@order/services/order.service';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'order_service', 'debug');
 
@@ -29,8 +29,12 @@ export const sellerId = async (req: Request, res: Response, next: NextFunction):
   }
 };
 
-export const buyerId = async (req: Request, res: Response, next: NextFunction): Pormise<void> => {
+export const buyerId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const { buyerId } = req.params;
+    const buyer = await getOrdersByBuyerId(buyerId);
+    res.status(StatusCodes.OK).json({ message: 'Orders received by buyer id', buyer });
+    logger.info('get buyer by id has been called successfully');
   } catch (error) {
     next(error);
   }

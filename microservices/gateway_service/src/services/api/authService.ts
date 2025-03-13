@@ -1,6 +1,6 @@
 import { config } from '@gateway/config';
 import { AxiosService } from '@gateway/services/axios';
-import { IAuth } from '@gateway/types/auth-interface';
+import { IAuth } from '@gateway/types/authInterface';
 import { AxiosResponse, AxiosInstance as authInstance } from 'axios';
 
 export let axiosAuthInstance: authInstance;
@@ -41,8 +41,8 @@ class AuthService {
     const response: AxiosResponse = await axiosAuthInstance.post('/resend-email', body);
     return response;
   }
-  async getRefreshToken(username: string): Promise<AxiosResponse> {
-    const response: AxiosResponse = await axiosAuthInstance.get(`/refresh-token/${username}`);
+  async getRefreshToken(): Promise<AxiosResponse> {
+    const response: AxiosResponse = await axiosAuthInstance.get('/refresh-token/');
     return response;
   }
 

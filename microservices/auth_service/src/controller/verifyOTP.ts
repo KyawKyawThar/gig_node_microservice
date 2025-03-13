@@ -15,7 +15,6 @@ export async function verifyOTP(req: Request, res: Response, next: NextFunction)
   try {
     const { otp } = req.params;
 
-    logger.info(`Verifying otp is ${otp}`);
     const { browserName, deviceType } = req.body;
 
     const result = await getUserByOTP(otp);

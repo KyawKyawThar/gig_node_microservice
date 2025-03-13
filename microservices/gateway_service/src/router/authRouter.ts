@@ -8,6 +8,7 @@ import { verifyOTP } from '@gateway/controller/auth/verifyOTP';
 import express, { Router } from 'express';
 import { authMiddleware } from '@gateway/services/auth-middleware';
 import { createAuthSeed } from '@gateway/controller/auth/seed';
+import { currentUser } from '@gateway/controller/auth/currentUser';
 
 class AuthRoute {
   private readonly router: Router;
@@ -24,8 +25,10 @@ class AuthRoute {
     this.router.put('/auth/verify-otp/:otp', verifyOTP.update);
     this.router.put('/auth/forget-password', password.forgetPassword);
     this.router.post('/auth/reset-password/:token', password.resetPassword);
-    this.router.post('/auth/seed/:count', createAuthSeed.seed);
     this.router.put('/auth/change-password', authMiddleware.verifyUser, password.changePassword);
+    this.router.post('/auth/seed/:count', createAuthSeed.seed);
+    this.router.post('/auth/resend-email', currentUser.resendEmail);
+
     return this.router;
   }
 }

@@ -13,12 +13,16 @@ export class Search {
 
       let queryString = '';
       const objectArray = Object.entries(req.query);
+
       const lastIndex = objectArray.length - 1;
+
       objectArray.forEach(([key, value], index) => {
+        console.log('object list key & value: ', key, value);
         queryString += `${key}=${value}${index !== lastIndex ? '&' : ''}`;
       });
-      const result = await gigService.searchGig(from, size, type, queryString);
 
+      const result = await gigService.searchGig(from, size, type, queryString);
+      console.log('gig service:', queryString);
       res.status(StatusCodes.OK).json({ message: result.data.message, total: result.data.total, data: result.data.gigs });
       logger.info('Search gigs have been successfully');
     } catch (error) {

@@ -31,9 +31,11 @@ class Search {
       console.log('before:', req.query);
       let queryString = '';
       const objectLists = Object.entries(req.query);
+      logger.info(`Object list: ${objectLists}`);
       const lastIndex = objectLists.length - 1;
 
       objectLists.forEach(([key, value], index) => {
+        console.log('object list key & value: ', key, value);
         queryString += `${key}=${value}${index !== lastIndex ? '&' : ''}`;
       });
 

@@ -15,4 +15,5 @@ export interface Config {
   JWT_SECRET: string;
   ORDER_BASE_PATH: string;
   ORDER: string;
+  STRIPE_API_KEY: string;
 }

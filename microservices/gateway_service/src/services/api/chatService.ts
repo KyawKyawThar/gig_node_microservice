@@ -9,7 +9,7 @@ class ChatService {
   axiosService: AxiosService;
 
   constructor() {
-    this.axiosService = new AxiosService(`${config.MESSAGE_BASE_URL}/api/v1/message`, 'message');
+    this.axiosService = new AxiosService(`${config.MESSAGE_BASE_URL}/api/v1/message`, 'chat');
     axiosChatInstance = this.axiosService.kkt;
   }
 

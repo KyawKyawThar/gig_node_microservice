@@ -7,6 +7,7 @@ const gigSchema: Schema = new Schema(
     username: { type: String, required: true },
     email: { type: String, required: true },
     title: { type: String, required: true },
+    profilePicture: { type: String, required: true },
     description: { type: String, required: true },
     basicTitle: { type: String, required: true },
     basicDescription: { type: String, required: true },
@@ -31,8 +32,10 @@ const gigSchema: Schema = new Schema(
   },
   {
     versionKey: false,
+    //convert _id to id because of to save in es.
+    // in general es don't accept _id to save
     toJSON: {
-      transform(_doc, rec) {
+      transform(_doc: ISellerGig, rec) {
         rec.id = rec._id;
         delete rec._id;
         return rec;

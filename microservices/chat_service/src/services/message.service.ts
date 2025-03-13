@@ -17,6 +17,7 @@ export const createConversation = async (conversationId: string, sender: string,
 export const addMessage = async (message: IMessageDocument): Promise<IMessageDocument> => {
   const create = (await messageModel.create(message)) as IMessageDocument;
 
+  console.log('addMessage...', create);
   const emailMessageDetail: IMessageDetails = {
     sender: message.senderUsername,
     amount: message.offer?.price,
@@ -140,6 +141,7 @@ export const markMessageAsRead = async (messageId: string): Promise<IMessageDocu
       }
     }
   )) as IMessageDocument;
+  socketIOChatObject.emit('update message', readMessage);
 
   return readMessage;
 };
@@ -149,7 +151,8 @@ export const markManyMessagesAsRead = async (messageId: string, sender: string, 
     {
       _id: messageId,
       senderUsername: sender,
-      receiverUsername: receiver
+      receiverUsername: receiver,
+      isRead: false
     },
     {
       $set: {
@@ -160,6 +163,6 @@ export const markManyMessagesAsRead = async (messageId: string, sender: string, 
 
   const result = (await messageModel.findOne({ _id: messageId })) as IMessageDocument;
 
-  socketIOChatObject.emit('update messages', result);
+  socketIOChatObject.emit('update message', result);
   return result;
 };

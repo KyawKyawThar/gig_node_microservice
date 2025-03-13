@@ -82,6 +82,8 @@ export async function getGigsBySearch(
       //The expression becomes ...{ search_after: ['10'] }, which adds search_after to the query
       //{ search_after: [from] }
     });
+
+    //logger.info('getGigsBySearch test:', from !== '0' && { search_after: [from] });
     return result.hits as ISearchResult;
   } catch (error) {
     logger.log('error', 'Auth Service elasticSearch getGigsBySearch() method', error);

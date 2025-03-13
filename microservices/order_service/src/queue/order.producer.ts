@@ -13,11 +13,15 @@ export const publicDirectMessage = async (
   message: string,
   logMessage: string
 ): Promise<void> => {
-  if (!channel) {
-    channel = (await createConnection()) as Channel;
-  }
+  try {
+    if (!channel) {
+      channel = (await createConnection()) as Channel;
+    }
 
-  await channel.assertExchange(exchangeName, 'direct');
-  channel.publish(exchangeName, routingKey, Buffer.from(message));
-  logger.info(logMessage);
+    await channel.assertExchange(exchangeName, 'direct');
+    channel.publish(exchangeName, routingKey, Buffer.from(message));
+    logger.info(logMessage);
+  } catch (e) {
+    logger.log('error', 'orderService publicDirectMessage() method error:', e);
+  }
 };

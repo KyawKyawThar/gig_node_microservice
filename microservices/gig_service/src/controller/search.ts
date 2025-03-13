@@ -15,6 +15,7 @@ export const gigs = async (req: Request, res: Response, next: NextFunction): Pro
 
     const paginate: IPaginateProps = { from, size: parseInt(`${size}`), type };
 
+    console.log('first', req.query.query);
     const gigs = await gigsSearch(
       `${req.query.query}`,
       paginate,

@@ -1,4 +1,4 @@
-import { IBuyerReviewMessageDetails, IRatingTypes, ISellerDocument, ISellerGig, UpdateISellerGig } from '@gig/types/gigTypes';
+import { IBuyerReviewMessageDetails, IRatingTypes, ISellerDocument, ISellerGig } from '@gig/types/gigTypes';
 import { config } from '@gig/config';
 import { addIndexData, deleteIndexData, getIndexData, updateIndexData } from '@gig/elasticSearch';
 import { gigSearchBySellerId } from './search.service';
@@ -29,6 +29,7 @@ export const createGig = async (gigs: ISellerGig): Promise<ISellerGig> => {
   if (createGig) {
     const gigData = createGig.toJSON() as ISellerGig;
 
+    //important connection with user service
     await publicDirectMessage(
       gigChannel,
       'user-seller-update',
@@ -43,7 +44,7 @@ export const createGig = async (gigs: ISellerGig): Promise<ISellerGig> => {
   return createGig;
 };
 
-export const updateGig = async (gigData: UpdateISellerGig, gigId: string): Promise<UpdateISellerGig> => {
+export const updateGig = async (gigData: ISellerGig, gigId: string): Promise<ISellerGig> => {
   const document = (await GigModel.findByIdAndUpdate(
     { _id: gigId },
     {
@@ -63,10 +64,10 @@ export const updateGig = async (gigData: UpdateISellerGig, gigId: string): Promi
     {
       new: true
     }
-  )) as UpdateISellerGig;
+  )) as ISellerGig;
   if (document) {
-    const gigData = document.toJSON?.() as UpdateISellerGig;
-    await updateIndexData(config.GIGS, gigId, gigData);
+    const gigData = document.toJSON?.() as ISellerGig;
+    await updateIndexData(config.GIGS, gigId, gigData!);
   }
   return document;
 };
@@ -113,6 +114,8 @@ export const updateActiveGig = async (gigId: string, active: boolean): Promise<I
     { new: true }
   )) as ISellerGig;
 
+  console.log(updateActiveGig);
+
   if (updateActiveGig) {
     const gigData = updateActiveGig.toJSON?.() as ISellerGig;
     await updateIndexData(config.GIGS, gigId, gigData);
@@ -149,6 +152,7 @@ export const gigSeedData = async (seller: ISellerDocument[], count: string): Pro
     'Business'
   ];
   const expectedDelivery: string[] = ['1 Day Delivery', '2 Days Delivery', '3 Days Delivery', '4 Days Delivery', '5 Days Delivery'];
+
   const randomRatings = [
     { sum: 20, count: 4 },
     { sum: 10, count: 2 },
@@ -182,6 +186,9 @@ export const gigSeedData = async (seller: ISellerDocument[], count: string): Pro
       ratingSum: (i + 1) % 4 === 0 ? rating!['sum'] : 0
     };
     console.log(`***SEEDING GIG*** - ${i + 1} of ${count}`);
-    await createGig(gig);
+
+    const data = await createGig(gig);
+
+    await addIndexData(config.GIGS, data.id!, data);
   }
 };

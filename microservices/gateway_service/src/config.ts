@@ -1,5 +1,6 @@
 import { Config } from '@gateway/types/envConfigType';
 import dotenv from 'dotenv';
+import * as process from 'node:process';
 
 dotenv.config();
 
@@ -33,7 +34,9 @@ function createConfig(): Config {
     SECRET_KEY_TWO: process.env.SECRET_KEY_TWO!,
     BASE_PATH: process.env.BASE_PATH!,
     USER_BASE_URL: process.env.USER_BASE_URL!,
-    REDIS_HOST: process.env.REDIS_HOST!
+    REVIEW_BASE_URL: process.env.REVIEW_BASE_URL!,
+    REDIS_HOST: process.env.REDIS_HOST!,
+    ORDER_BASE_URL: process.env.ORDER_BASE_URL!
   };
 }
 

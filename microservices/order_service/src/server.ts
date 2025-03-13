@@ -15,12 +15,13 @@ import { checkConnection } from './elasticSearch';
 import { createConnection } from './queue/connection';
 import compression from 'compression';
 import { appRoutes } from './route';
-import { IError } from './types/errorHandlerTypes';
+import { IErrorResponse } from './types/errorHandlerTypes';
 import { CustomError } from './errorHandler';
+import { consumerReviewFanoutMessages } from '@order/queue/order.consumer';
 
 const logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'orderService', 'debug');
 
-export let socketIOChatObject: Server;
+export let socketIOOrderObject: Server;
 export let orderChannel: Channel;
 
 export function start(app: Application) {
@@ -71,6 +72,7 @@ async function startElasticSearch() {
 
 async function startQueue() {
   orderChannel = (await createConnection()) as Channel;
+  await consumerReviewFanoutMessages(orderChannel);
 }
 
 function standardMiddleware(app: Application) {
@@ -83,7 +85,7 @@ function routerMiddleware(app: Application) {
   appRoutes(app);
 }
 function orderErrorHandler(app: Application) {
-  app.use((err: IError, _req: Request, res: Response, next: NextFunction) => {
+  app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
     logger.error(`order server orderErrorHandler ${err.comingFrom}`);
     if (err instanceof CustomError) {
       return res.status(err.statusCode).json(err?.serializeError());
@@ -95,8 +97,7 @@ function orderErrorHandler(app: Application) {
 function startServer(app: Application): void {
   try {
     const server = new http.Server(app);
-    const socketServer = createSockIOServer(server);
-    socketIOChatObject = socketServer;
+    socketIOOrderObject = createSockIOServer(server);
     startHttpServer(server);
   } catch (error) {
     logger.log('error', 'order service startServer() method error', error);

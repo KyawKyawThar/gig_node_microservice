@@ -12,10 +12,7 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificati
 export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
   try {
     if (!channel) {
-      const createChannel = await createConnection();
-      if (createChannel) {
-        channel = createChannel;
-      }
+      channel = (await createConnection()) as Channel;
     }
 
     await channel.assertExchange('email-notification', 'direct');

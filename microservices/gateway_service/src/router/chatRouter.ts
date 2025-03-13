@@ -1,4 +1,4 @@
-import { Create } from '@gateway/controller/chats/create';
+ import { Create } from '@gateway/controller/chats/create';
 import { Get } from '@gateway/controller/chats/get';
 import { Update } from '@gateway/controller/chats/update';
 import { Router } from 'express';

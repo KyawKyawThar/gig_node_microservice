@@ -45,6 +45,7 @@ export const consumeBuyerDirectMessage = async (channel: Channel): Promise<void>
           };
 
           await createBuyer(buyer);
+          logger.info('rabbit mq Buyer created successfully from auth service', buyer);
         } else {
           const { buyerId, purchasedGigs } = JSON.parse(msg!.content.toString());
           await updateBuyerPurchasedGigsProp(buyerId, purchasedGigs, type);
@@ -79,6 +80,7 @@ export const consumeSellerDirectMessage = async (channel: Channel): Promise<void
               break;
             case 'update-gig-count':
               await updateTotalGigsCount(sellerId, count);
+              break;
             case 'approve-order':
               await updateSellerCompletedJobsProp({ sellerId, ongoingJobs, completedJobs, totalEarnings, recentDelivery });
               break;
@@ -156,7 +158,7 @@ export const consumeSeedGigDirectMessage = async (channel: Channel): Promise<voi
           await publicDirectMessage(
             channel,
             'user-seed-gigs',
-            'receive-seller',
+            'seed-seller',
             JSON.stringify({ type: 'receiveSellers', randomSeller, count }),
             'Message sent to gig service'
           );

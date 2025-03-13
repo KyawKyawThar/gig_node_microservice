@@ -1,6 +1,6 @@
 import { config } from '@gateway/config';
 import { AxiosService } from '@gateway/services/axios';
-import { ISellerGig } from '@gateway/types/auth-interface';
+import { ISellerGig } from '@gateway/types/authInterface';
 import { AxiosInstance as gigInstance, AxiosResponse } from 'axios';
 
 export let axiosGigInstance: gigInstance;
@@ -37,7 +37,7 @@ class GigService {
   }
 
   async searchGig(from: string, size: string, type: string, query: string): Promise<AxiosResponse> {
-    return await axiosGigInstance.get(`/search/${from}/${size}/${type}?query=${query}`);
+    return await axiosGigInstance.get(`/search/${from}/${size}/${type}?${query}`);
   }
 
   async createGig(body: ISellerGig): Promise<AxiosResponse> {

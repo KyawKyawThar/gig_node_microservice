@@ -22,6 +22,7 @@ export const gigSearchBySellerId = async (searchQuery: string, active: boolean):
       bool: { must: [...queryList] }
     }
   });
+
   const total = searchResult.hits.total as IHitTotal;
   return {
     hits: searchResult.hits.hits,
@@ -33,7 +34,7 @@ export const gigsSearchByCategory = async (searchQuery: string): Promise<ISearch
   const queryList: IQueryList[] = [
     {
       query_string: {
-        fields: ['category'],
+        fields: ['categories'],
         query: `${searchQuery}`
       }
     },
@@ -42,6 +43,7 @@ export const gigsSearchByCategory = async (searchQuery: string): Promise<ISearch
 
   const { hits } = await elasticSearchClient.search({
     index: config.GIGS,
+    size: 10,
     query: {
       bool: { must: [...queryList] }
     }
@@ -63,6 +65,7 @@ export const gigsSearch = async (
   maxPrice?: number
 ): Promise<ISearchResult> => {
   const { from, size, type } = paginate;
+
   const queryList: IQueryList[] = [
     {
       query_string: {
@@ -73,7 +76,7 @@ export const gigsSearch = async (
     { term: { active: true } }
   ];
 
-  if (deliveryTime !== undefined) {
+  if (deliveryTime !== 'undefined') {
     queryList.push({
       query_string: {
         fields: ['expectedDelivery'],
@@ -93,7 +96,7 @@ export const gigsSearch = async (
     });
   }
 
-  const result: SearchResponse = await elasticSearchClient.search({
+  const result = await elasticSearchClient.search({
     index: config.GIGS,
     size,
     query: {
@@ -101,12 +104,15 @@ export const gigsSearch = async (
         must: [...queryList]
       }
     },
-    sort: [
-      {
-        sortId: type === 'forward' ? 'asc' : 'desc'
-      }
-    ],
+    sort: [{ sortId: type === 'forward' ? 'asc' : 'desc' }],
     ...(from !== '0' && { search_after: [from] })
+    //from is '0': from !== '0' evaluates to false
+    //The expression becomes ...(false) which results in nothing being added to the object
+    //So, search_after is omitted from the query.
+
+    //from is '10  evaluates to true
+    //The expression becomes ...{ search_after: ['10'] }, which adds search_after to the query
+    //{ search_after: [from] }
   });
 
   const total = result.hits.total as IHitTotal;
@@ -156,7 +162,7 @@ export const getTopGigsByCategory = async (searchQuery: string): Promise<ISearch
               source: "doc['ratingSum'].value != 0 && (doc['ratingSum'].value / doc['ratingsCount'].value == params['threshold'])",
               lang: 'painless',
               params: {
-                threhold: 5
+                threshold: 5
               }
             }
           }
@@ -164,7 +170,7 @@ export const getTopGigsByCategory = async (searchQuery: string): Promise<ISearch
         must: [
           {
             query_string: {
-              fields: ['category'],
+              fields: ['categories'],
               query: `*${searchQuery}*`
             }
           }

@@ -22,11 +22,12 @@ class GigRoute {
     this.router.get('/gig/top/:username', authMiddleware.checkAuthentication, Get.prototype.topRelatedGigs);
     this.router.get('/gig/search/:from/:size/:type', authMiddleware.checkAuthentication, Search.prototype.gigs);
     this.router.get('/gig/similar/:gigId', authMiddleware.checkAuthentication, Get.prototype.similarGigs);
-    this.router.post('/gig/create', authMiddleware.checkAuthentication, Create.prototype.createGig);
-    this.router.post('/gig/seed/:count', authMiddleware.checkAuthentication, GigSeed.prototype.seed);
-    this.router.put('/gig/:gigId', authMiddleware.checkAuthentication, Update.prototype.updateGig);
     this.router.put('/gig/active/:gigId', authMiddleware.checkAuthentication, Update.prototype.updateActiveGig);
+    this.router.put('/gig/:gigId', authMiddleware.checkAuthentication, Update.prototype.updateGig);
+    this.router.post('/gig/create', authMiddleware.checkAuthentication, Create.prototype.createGig);
     this.router.delete('/gig/:gigId/:sellerId', authMiddleware.checkAuthentication, Delete.prototype.deleteGig);
+
+    this.router.post('/gig/seed/:count', authMiddleware.checkAuthentication, GigSeed.prototype.seed);
 
     return this.router;
   }

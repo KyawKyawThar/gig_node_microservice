@@ -8,16 +8,16 @@ export function verifyGigGatewayRequest(req: Request, _res: Response, next: Next
   try {
     const token = req.headers?.gatewaytoken as string;
     if (!token) {
-      throw new UnAuthorizedError('Token is not a valid from api gateway token', 'Invalid gigGatewayRequest() method');
+      return next(new UnAuthorizedError('Token is not a valid from api gateway token', 'Invalid gigGatewayRequest() method'));
     }
 
     const payload = JWT.verify(token, config.GATEWAY_JWT_TOKEN) as { id: string; iat: number };
 
     if (payload.id !== config.GIGS) {
-      return new UnAuthorizedError('Request is not for gig service', 'verifyAuthGatewayRequest() method');
+      return next(new UnAuthorizedError('Request is not for gig service', 'verifyAuthGatewayRequest() method'));
     }
   } catch (err) {
-    throw new UnAuthorizedError('Request payload is invalid', 'gigGatewayRequest() method');
+    return next(new UnAuthorizedError('Request payload is invalid', 'gigGatewayRequest() method'));
   }
   next();
 }

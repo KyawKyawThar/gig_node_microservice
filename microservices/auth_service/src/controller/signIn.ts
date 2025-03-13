@@ -1,19 +1,19 @@
 import { randomInt } from 'crypto';
-
-import { config } from '@auth/config';
-import { BadRequestError, NotAuthorizedError, ServerError } from '@auth/errorHandler';
+import { BadRequestError, ForbiddenError, NotAuthorizedError, NotFoundError, ServerError } from '@auth/errorHandler';
 import { AuthModel } from '@auth/models/auth.schema';
 import { publicDirectMessage } from '@auth/queues/auth.producer';
 import { signInSchema } from '@auth/schemes/signin';
 import { authChannel } from '@auth/server';
-import { getUserByEmail, getUserByUsername, signToken, updateUserOTP } from '@auth/services/auth.service';
+import { getUserByEmail, getUserByUsername, signToken, updateUserOTP, userRefreshToken } from '@auth/services/auth.service';
 import { IAuthDocument, IEmailMessageDetails } from '@auth/types/authTypes';
-import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { omit } from 'lodash';
-import { winstonLogger } from '@auth/logger';
 import { DatabaseError } from 'sequelize';
+
+import { config } from '@auth/config';
+import { winstonLogger } from '@auth/logger';
 import { Logger } from 'winston';
+import { NextFunction, Request, Response } from 'express';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth-server', 'debug');
 
@@ -24,27 +24,38 @@ export function isGmail(email: string): boolean {
 
 export async function signIn(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    const { email, password, browserName, deviceType } = req.body;
+
+    console.log('Reach in SignIn', req.body);
+    logger.info(req.body);
+    const isValid = isGmail(email);
+
+    if (!isValid) {
+      throw new ForbiddenError('Email is not valid', 'auth-service signIn method() error');
+    }
+
     const { error } = signInSchema.validate(req.body);
 
     if (error?.details) {
       throw new BadRequestError(error.details[0].message, 'auth-service signIn create() method error');
     }
 
-    const { email, password, browserName, deviceType } = req.body;
-
-    const isValid = isGmail(email);
-
     const result = isValid ? await getUserByEmail(email) : await getUserByUsername(email);
+
+    if (!result) {
+      throw new NotFoundError('user does not exist', 'auth-service signIn method() error');
+    }
 
     if (result instanceof DatabaseError) {
       logger.error(`SQL Error Message: ${result.original.message}`);
-      throw new ServerError(result.original.message, 'auth-service verifyOTP method() error');
+      throw new ServerError(result.original.message, 'auth-service Sign In method() error');
     }
     const existingUser = result as IAuthDocument;
 
-    if (!existingUser) {
-      throw new BadRequestError('user does not exist', 'auth-service signIn method() error');
+    if (!existingUser.emailVerified) {
+      throw new ForbiddenError('Email not verified. Please verify your email to continue.', 'auth-service signIn method() error');
     }
+
     if (existingUser.password) {
       const isMatchPassword: boolean = await AuthModel.prototype.comparePassword(password, existingUser.password!);
       if (!isMatchPassword) {
@@ -53,6 +64,7 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
     }
 
     let userJWT: string = '';
+    let refreshToken: string = '';
     let userData: IAuthDocument | null = null;
     let message: string = 'User login successfully';
     let userBrowserName: string = '';
@@ -84,10 +96,18 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
       await updateUserOTP(existingUser.id!, `${otpCode}`, otpExpirationDate, '', '');
     } else {
       userJWT = signToken(existingUser.id!, existingUser.username!, existingUser.email!);
+      refreshToken = userRefreshToken(result.id!, result.username!, result.email!);
       userData = omit(existingUser, ['password']);
     }
 
-    res.status(StatusCodes.OK).json({ message, user: userData, token: userJWT, browserName: userBrowserName, deviceType: userDeviceType });
+    res.status(StatusCodes.OK).json({
+      message,
+      user: userData,
+      token: userJWT,
+      browserName: userBrowserName,
+      deviceType: userDeviceType,
+      refreshToken
+    });
     logger.info('User signed in successfully..');
   } catch (err) {
     next(err);

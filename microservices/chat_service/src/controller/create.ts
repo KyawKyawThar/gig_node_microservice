@@ -20,14 +20,14 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
     if (error?.details) {
       throw new BadRequestError(error.details[0].message, 'chat-service chat-service createMessage() method error');
     }
-
-    let uploadURL: UploadApiResponse;
-    let file = req.body.file;
-    const randomBytes = await Promise.resolve(crypto.randomBytes(20));
-
-    const randomCharacter = randomBytes.toString('hex');
+    let file;
 
     if (req.body.file) {
+      let uploadURL: UploadApiResponse;
+      file = req.body.file;
+      const randomBytes = crypto.randomBytes(20);
+
+      const randomCharacter = randomBytes.toString('hex');
       uploadURL = (
         req.body.fileType === 'zip' ? await upload(req.body.file, `${randomCharacter}.zip`) : await upload(req.body.file)
       ) as UploadApiResponse;
@@ -42,7 +42,7 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
     }
 
     const data: IMessageDocument = {
-      conversationId: req.body.conversationId,
+      conversationId: req.body?.conversationId,
       body: req.body.body,
       file,
       fileType: req.body.fileType,
@@ -59,7 +59,9 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
       hasOffer: req.body.hasOffer,
       offer: req.body.offer
     };
+
     if (!req.body.hasConversationId) {
+      console.log('data is : ', data);
       await createConversation(data.conversationId, data?.senderUsername!, data?.receiverUsername!);
     }
 

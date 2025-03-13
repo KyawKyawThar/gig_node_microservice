@@ -47,6 +47,23 @@ export class NotAuthorizedError extends CustomError {
   }
 }
 
+export class ConflictError extends CustomError {
+  statusCode = StatusCodes.CONFLICT;
+  status = 'ConflictError';
+
+  constructor(message: string, comingFrom: string) {
+    super(message, comingFrom);
+  }
+}
+
+export class ForbiddenError extends CustomError {
+  statusCode = StatusCodes.FORBIDDEN;
+  status = 'NotAuthorizedError';
+
+  constructor(message: string, comingFrom: string) {
+    super(message, comingFrom);
+  }
+}
 export class ServerError extends CustomError {
   statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
   status = 'ServerError';

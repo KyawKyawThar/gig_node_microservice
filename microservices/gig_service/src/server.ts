@@ -13,7 +13,7 @@ import rateLimit from 'express-rate-limit';
 import { verify } from 'jsonwebtoken';
 import { IAuthPayload } from './types/gigTypes';
 import { createConnection } from './queue/connection';
-import { checkConnection } from './elasticSearch';
+import { checkConnection, createIndex } from './elasticSearch';
 import { appRoutes } from './routes';
 import { IErrorResponse } from './types/errorHandlerTypes';
 import { CustomError } from './errorHandler';
@@ -41,6 +41,7 @@ async function startQueue() {
 
 async function startElasticSearch() {
   await checkConnection();
+  await createIndex('gigs');
 }
 
 function securityMiddleware(app: Application) {

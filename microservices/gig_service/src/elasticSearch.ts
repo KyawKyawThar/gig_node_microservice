@@ -31,11 +31,12 @@ async function checkIndexIsExists(indexName: string): Promise<boolean> {
 export async function createIndex(indexName: string): Promise<void> {
   try {
     const isExist = await checkIndexIsExists(indexName);
-    if (isExist) {
-      logger.info(`Index ${indexName} is already exists`);
+    if (!isExist) {
+      await elasticSearchClient.indices.create({ index: indexName });
+      await elasticSearchClient.indices.refresh({ index: indexName });
+      logger.info(`created index "${indexName}"`);
     }
-    await elasticSearchClient.indices.create({ index: indexName });
-    await elasticSearchClient.indices.refresh({ index: indexName });
+    logger.info(`Index ${indexName} is already exists`);
   } catch (error) {
     logger.error(`An error occurred while creating the index ${indexName}`);
     logger.log('error', 'GigService createIndex() method error:', error);
@@ -59,14 +60,16 @@ export async function getIndexData(index: string, indexId: string): Promise<ISel
     return {} as ISellerGig;
   }
 }
-export async function addIndexData(indexName: string, indexId: string, gigDocument: unknown): Promise<void> {
+export async function addIndexData(indexName: string, indexId: string, gigDocument: ISellerGig): Promise<void> {
   try {
-    await elasticSearchClient.index({ index: indexName, id: indexId, document: gigDocument });
+    const result = await elasticSearchClient.index({ index: indexName, id: indexId, document: gigDocument });
+
+    console.log('addIndexData...', result);
   } catch (error) {
     logger.log('error', 'GigService elasticsearch addIndexData() method error:', error);
   }
 }
-export async function updateIndexData(indexName: string, indexId: string, gigDocument: unknown): Promise<void> {
+export async function updateIndexData(indexName: string, indexId: string, gigDocument: ISellerGig): Promise<void> {
   try {
     await elasticSearchClient.update({ index: indexName, id: indexId, doc: gigDocument });
   } catch (error) {

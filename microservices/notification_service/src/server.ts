@@ -48,7 +48,6 @@ async function startQueue(): Promise<void> {
 }
 
 async function startElasticSearch(): Promise<void> {
-  logger.info('running elastic search');
   await checkConnection();
 }
 

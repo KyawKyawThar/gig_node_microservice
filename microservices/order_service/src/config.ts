@@ -6,7 +6,7 @@ dotenv.config();
 if (process.env.ENABLE_APM === '1') {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('elastic-apm-node').start({
-    serviceName: 'chat_service',
+    serviceName: 'order_service',
     serverURL: process.env.ELASTIC_APM_SERVER_URL,
     secretToken: process.env.ELASTIC_APM_SECRET_TOKEN,
     environment: process.env.NODE_ENV,
@@ -34,7 +34,8 @@ function createConfig(): Config {
     GATEWAY_JWT_TOKEN: process.env.GATEWAY_JWT_TOKEN!,
     JWT_SECRET: process.env.JWT_SECRET!,
     ORDER_BASE_PATH: process.env.ORDER_BASE_PATH!,
-    ORDER: process.env.ORDER!
+    ORDER: process.env.ORDER!,
+    STRIPE_API_KEY: process.env.STRIPE_API_KEY!
   };
 }
 

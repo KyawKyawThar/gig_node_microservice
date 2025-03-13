@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
 import { config } from '@auth/config';
-import { BadRequestError, NotFoundError, ServerError } from '@auth/errorHandler';
+import { BadRequestError, ForbiddenError, NotFoundError, ServerError } from '@auth/errorHandler';
 import { winstonLogger } from '@auth/logger';
 import { changePasswordSchema, emailSchema, passwordSchema } from '@auth/schemes/password';
 import { getUserByEmail, getUserByPasswordToken, updatePassword, updatePasswordToken } from '@auth/services/auth.service';
@@ -40,7 +40,7 @@ export async function forgetPassword(req: Request, res: Response, next: NextFunc
     const randomByte = crypto.randomBytes(20);
     const randomCharacter = randomByte.toString('hex');
 
-    const resetLink = `${config.CLIENT_URL}/reset_password?v_token=${randomCharacter}`;
+    const resetLink = `${config.CLIENT_URL}/reset_password?token=${randomCharacter}`;
 
     const messageDetail: IEmailMessageDetails = {
       receiverEmail: user.email,
@@ -92,7 +92,12 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
     if (!checkUser) {
       throw new BadRequestError('Reset token is invalid OR expired', 'Password resetPassword() method error');
     }
-
+    if (checkUser.password) {
+      const isMatchPassword: boolean = await AuthModel.prototype.comparePassword(password, checkUser.password!);
+      if (isMatchPassword) {
+        throw new ForbiddenError('Please do not used the old one ', 'auth-service signIn method() error');
+      }
+    }
     const hashPassword = await AuthModel.prototype.hashPassword(password);
 
     await updatePassword(checkUser.id!, hashPassword);
@@ -108,7 +113,7 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
       config.EMAIL_EXCHANGE_NAME,
       config.EMAIL_ROUTING_KEY,
       JSON.stringify(message),
-      'Password change successResetPassword message sent to notification service.'
+      'ResetPassword message have been sent to notification service.'
     );
 
     res.status(StatusCodes.OK).json({ message: 'Password successfully updated.' });
@@ -126,9 +131,9 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
       throw new BadRequestError(error.details[0].message, 'Password changePassword() method error');
     }
 
-    const { newPassword } = req.body;
+    const { currentPassword, newPassword } = req.body;
 
-    logger.info(newPassword, 'new password from body');
+    console.log({ currentPassword, newPassword });
 
     const result = await getUserByEmail(req.currentUser.email);
 
@@ -143,6 +148,20 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
       throw new BadRequestError('Invalid password', 'Password changePassword() method error');
     }
 
+    if (checkUser.password) {
+      const isMatchPassword: boolean = await AuthModel.prototype.comparePassword(currentPassword, checkUser.password!);
+      if (!isMatchPassword) {
+        throw new ForbiddenError('Password do not match the old one ', 'auth-service signIn method() error');
+      }
+    }
+
+    if (currentPassword === newPassword) {
+      throw new BadRequestError('currentPassword and newPassword should not be the same', 'Password resetPassword() method error');
+    }
+
+    const hashedPassword: string = await AuthModel.prototype.hashPassword(newPassword);
+    await updatePassword(checkUser.id!, hashedPassword);
+
     const messageDetails: IEmailMessageDetails = {
       username: checkUser.username,
       template: 'successResetPassword',
@@ -156,9 +175,6 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
       JSON.stringify(messageDetails),
       'Password change successResetPassword message sent to notification service.'
     );
-    const hashPassword = await AuthModel.prototype.hashPassword(newPassword);
-
-    await updatePassword(checkUser.id!, hashPassword);
 
     res.status(StatusCodes.CREATED).json({ message: 'Password successfully changed.' });
   } catch (err) {

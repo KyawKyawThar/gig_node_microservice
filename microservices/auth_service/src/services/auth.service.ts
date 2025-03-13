@@ -1,12 +1,12 @@
 import { config } from '@auth/config';
 import { winstonLogger } from '@auth/logger';
 import { AuthModel } from '@auth/models/auth.schema';
-import { publicDirectMessage } from '@auth/queues/auth.producer';
-import { authChannel } from '@auth/server';
-import { IAuthBuyerMessageDetails, IAuthDocument } from '@auth/types/authTypes';
+// import { publicDirectMessage } from '@auth/queues/auth.producer';
+// import { authChannel } from '@auth/server';
+import { IAuthDocument } from '@auth/types/authTypes';
 import { sign } from 'jsonwebtoken';
 import { omit, toLower } from 'lodash';
-import { Model, Op, DatabaseError } from 'sequelize';
+import { DatabaseError, Model, Op } from 'sequelize';
 import { Logger } from 'winston';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth Service ', 'debug');
@@ -22,25 +22,8 @@ export function firstLetterUpperCase(input: string): string {
 export async function createUser(data: IAuthDocument): Promise<IAuthDocument | DatabaseError | undefined> {
   try {
     const result = await AuthModel.create(data);
-    const buyerMessageDetail: IAuthBuyerMessageDetails = {
-      username: result.dataValues.username,
-      profilePicture: result.dataValues.profilePicture,
-      email: result.dataValues.email,
-      country: result.dataValues.country,
-      createdAt: result.dataValues.createdAt,
-      type: 'auth'
-    };
-    await publicDirectMessage(
-      authChannel,
-      'user-buyer-update',
-      'user-buyer',
-      JSON.stringify(buyerMessageDetail),
-      'buyer details sends to buyer service'
-    );
 
-    const userData: IAuthDocument = omit(result.dataValues, ['password']);
-
-    return userData;
+    return omit(result.dataValues, ['password']);
   } catch (error) {
     if (error instanceof DatabaseError) {
       // logger.error('SQL Error Message:', error.original);
@@ -121,22 +104,19 @@ export async function getUserByEmailVerifyToken(token: string): Promise<IAuthDoc
   }
 }
 
-export async function updateVerifyEmail(
-  authId: number,
-  emailVerified: number,
-  emailVerificationToken?: string
-): Promise<DatabaseError | void> {
+export async function updateVerifyEmail(authId: number, emailVerified: number, emailVerificationToken?: string): Promise<Error | null> {
+  // Explicitly return DatabaseError or null
   try {
-    await AuthModel.update(
-      !emailVerificationToken ? { emailVerified, emailVerificationToken: '' } : { emailVerified, emailVerificationToken },
-      {
-        where: { id: authId }
-      }
-    );
+    console.log({ authId, emailVerified, emailVerificationToken });
+
+    await AuthModel.update(!emailVerificationToken ? { emailVerified } : { emailVerified, emailVerificationToken }, {
+      where: { id: authId }
+    });
+
+    return null; // Explicitly return null when successful
   } catch (error) {
-    if (error instanceof DatabaseError) {
-      return error;
-    }
+    // console.log('error is:', error);
+    return error as Error;
   }
 }
 
@@ -147,7 +127,8 @@ export async function getUserByPasswordToken(token: string): Promise<IAuthDocume
         [Op.and]: [{ passwordResetExpires: { [Op.gt]: Date.now() } }, { passwordResetToken: token }]
       }
     })) as Model;
-    return result.dataValues;
+
+    return result?.dataValues;
   } catch (error) {
     if (error instanceof DatabaseError) {
       return error;
@@ -228,5 +209,9 @@ export async function updateUserOTP(
 }
 
 export function signToken(id: number, username: string, email: string): string {
-  return sign({ id, username, email }, config.JWT_SECRET);
+  return sign({ id, username, email }, config.JWT_SECRET, { expiresIn: '15m' });
+}
+
+export function userRefreshToken(id: number, username: string, email: string): string {
+  return sign({ id, username, email }, config.JWT_SECRET, { expiresIn: '7d' }); // Longer expiry for refresh token
 }

@@ -1,5 +1,6 @@
 import http from 'http';
 
+import cookieParser from 'cookie-parser';
 import { Logger } from 'winston';
 import { winstonLogger } from '@auth/logger';
 import { config } from '@auth/config';
@@ -34,6 +35,7 @@ export function start(app: Application) {
 }
 
 function securityMiddleware(app: Application): void {
+  app.use(cookieParser()); // 🟢 REQUIRED for reading cookies
   app.set('trust proxy', 1);
 
   app.use(hpp());
@@ -59,7 +61,7 @@ function securityMiddleware(app: Application): void {
   app.use(async (req: Request, _res: Response, next: NextFunction) => {
     if (req.headers?.authorization && req.headers.authorization.startsWith('Bearer')) {
       const token = req.headers.authorization.split(' ')[1];
-
+      console.log('authService cookies', req.cookies);
       const payload = verify(token, config.JWT_SECRET) as IAuthPayload;
       req.currentUser = payload;
       logger.info('auth-service', req.url);
@@ -89,7 +91,7 @@ async function startElasticSearch(): Promise<void> {
 
 function authErrorHandler(app: Application): void {
   app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.log('error', `Auth service ${error.comingFrom}`, error?.serializeError());
+    // logger.log('error', `Auth service ${error.comingFrom}`, error?.serializeError());
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json(error?.serializeError());
     }
