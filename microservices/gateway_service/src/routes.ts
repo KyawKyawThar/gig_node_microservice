@@ -14,7 +14,7 @@ import { orderRoute } from '@gateway/router/orderRouter';
 import { reviewRoute } from '@gateway/router/reviewRouter';
 
 export const appRoutes = (app: Application) => {
-  app.use(config.BASE_PATH, healthRoute.routes());
+  app.use('', healthRoute.routes());
 
   app.use(config.BASE_PATH, authRoute.routes());
   app.use(config.BASE_PATH, searchRoute.routes());

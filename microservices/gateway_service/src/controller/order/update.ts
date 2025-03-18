@@ -34,7 +34,7 @@ export class Update {
     try {
       const { orderId, type } = req.params;
 
-      const response = await orderService.updaateDeleiveryExtension(type, orderId, req.body);
+      const response = await orderService.updateDeleiveryExtension(type, orderId, req.body);
       logger.info(response.data.message);
       res.status(StatusCodes.OK).json({ message: response.data.message, order: response.data.order });
     } catch (err) {
@@ -47,6 +47,7 @@ export class Update {
       const { orderId } = req.params;
 
       const response = await orderService.deliverOrder(orderId, req.body);
+      console.log('deliver order is:', response.data);
       res.status(StatusCodes.OK).json({ message: response.data.message, order: response.data.order });
       logger.info(response.data.message);
     } catch (err) {

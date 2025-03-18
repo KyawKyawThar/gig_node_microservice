@@ -21,7 +21,7 @@ export class Get {
     try {
       const response = await orderService.sellerOrder(req.params.sellerId);
       logger.info(response.data.message);
-      res.status(StatusCodes.OK).json({ message: response.data.message, order: response.data.order });
+      res.status(StatusCodes.OK).json({ message: response.data.message, order: response.data.seller });
     } catch (err) {
       next(err);
     }
@@ -30,7 +30,7 @@ export class Get {
     try {
       const response = await orderService.buyerOrder(req.params.buyerId);
       logger.info(response.data.message);
-      res.status(StatusCodes.OK).json({ message: response.data.message, order: response.data.order });
+      res.status(StatusCodes.OK).json({ message: response.data.message, order: response.data.buyer });
     } catch (err) {
       next(err);
     }

@@ -14,12 +14,14 @@ class Refresh {
 
       const response = await authService.getRefreshToken();
 
-      res.cookie('refreshToken', response.data.refreshToken, {
-        httpOnly: true,
-        //  secure: config.NODE_ENV !== 'development',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-      });
+      // res.cookie('refreshToken', response.data.refreshToken, {
+      //   httpOnly: true,
+      //   //  secure: config.NODE_ENV !== 'development',
+      //   sameSite: 'strict',
+      //   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      // });
+
+      req.session = { jwt: response.data.refreshToken };
       res.status(StatusCodes.OK).json({ message: response.data.message, accessToken: response.data.accessToken });
 
       logger.info('Refresh token have been generated successfully');

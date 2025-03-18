@@ -6,7 +6,7 @@ import { winstonLogger } from '@gateway/logger';
 import { config } from '@gateway/config';
 import { io, Socket as SocketClient } from 'socket.io-client';
 import { IMessageDocuments } from '@gateway/types/chatInterface';
-//import { IOrderDocument, IOrderNotification } from '@gateway/types/orderInterface';
+import { IOrderDocument, IOrderNotification } from '@gateway/types/orderInterface';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway server', 'debug');
 
@@ -18,12 +18,12 @@ export class SocketIOAppHandler {
   constructor(io: Server) {
     this.io = io;
     this.gateWayCache = gatewayCache;
-    this.chatSocketIOPrivateConnection();
+    // this.chatSocketIOPrivateConnection();
   }
 
   public listen(): void {
-    // this.chatSocketIOPrivateConnection();
-    // this.orderSocketPrivateConnection();
+    this.chatSocketIOPrivateConnection();
+    this.orderSocketPrivateConnection();
     this.io.on('connection', async (socket: Socket) => {
       socket.on('category', async (category: string, username: string) => {
         await this.gateWayCache.saveUserSelectedCategory(`selectedCategories:${username}`, category);
@@ -78,28 +78,28 @@ export class SocketIOAppHandler {
     });
   }
 
-  // private orderSocketPrivateConnection(): void {
-  //   const orderSocketClient = io(`${config.ORDER_BASE_URL}`, {
-  //     transports: ['polling', 'websocket', 'webtransport'],
-  //     secure: true
-  //   });
-  //
-  //   orderSocketClient.on('connect', () => {
-  //     logger.info('Order service socket connected');
-  //   });
-  //   orderSocketClient.on('disconnect', (error: SocketClient.DisconnectReason) => {
-  //     logger.log('error', 'ChatService socket disconnected error', error);
-  //     orderSocketClient.connect();
-  //   });
-  //   orderSocketClient.on('connect_error', (error: Error) => {
-  //     logger.log('error', 'ChatService socket disconnected error', error);
-  //     orderSocketClient.connect();
-  //   });
-  //
-  //   // custom-socket
-  //   orderSocketClient.on('order notification', (document: IOrderDocument, notification: IOrderNotification) => {
-  //     logger.info('gateway sockets orderSocketClient received document', document, notification);
-  //     this.io.emit('order notification', document, notification);
-  //   });
-  // }
+  private orderSocketPrivateConnection(): void {
+    const orderSocketClient = io(`${config.ORDER_BASE_URL}`, {
+      transports: ['polling', 'websocket', 'webtransport'],
+      secure: true
+    });
+
+    orderSocketClient.on('connect', () => {
+      logger.info('Order service socket connected');
+    });
+    orderSocketClient.on('disconnect', (error: SocketClient.DisconnectReason) => {
+      logger.log('error', 'OrderService socket disconnected error', error);
+      orderSocketClient.connect();
+    });
+    orderSocketClient.on('connect_error', (error: Error) => {
+      logger.log('error', 'Order Service socket disconnected error', error);
+      orderSocketClient.connect();
+    });
+
+    // custom-socket
+    orderSocketClient.on('order notification', (document: IOrderDocument, notification: IOrderNotification) => {
+      logger.info('gateway sockets orderSocketClient received document', document, notification);
+      this.io.emit('order notification', document, notification);
+    });
+  }
 }

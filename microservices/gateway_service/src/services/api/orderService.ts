@@ -8,6 +8,7 @@ export let axiosOrderInstance: orderInstance;
 class OrderService {
   constructor() {
     const axiosService = new AxiosService(`${config.ORDER_BASE_URL}/api/v1/order`, 'order');
+
     axiosOrderInstance = axiosService.kkt;
   }
   async getOrderById(orderId: string): Promise<AxiosResponse> {
@@ -36,7 +37,7 @@ class OrderService {
   async requestDeleliveryExtension(orderId: string, body: IExtendedDelivery): Promise<AxiosResponse> {
     return axiosOrderInstance.put(`/extension/${orderId}`, body);
   }
-  async updaateDeleiveryExtension(orderId: string, type: string, body: IExtendedDelivery): Promise<AxiosResponse> {
+  async updateDeleiveryExtension(type: string, orderId: string, body: IExtendedDelivery): Promise<AxiosResponse> {
     return axiosOrderInstance.put(`/gig/${type}/${orderId}`, body);
   }
 
