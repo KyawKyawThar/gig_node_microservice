@@ -7,6 +7,7 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { sortBy } from 'lodash';
 import { Logger } from 'winston';
+//import { NotAuthorizedError } from '@auth/errorHandler';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth-server', 'debug');
 
@@ -26,8 +27,13 @@ export async function gigs(req: Request, res: Response, next: NextFunction): Pro
   try {
     const { type, size, from } = req.params;
 
-    logger.info('auth-service gigs search ', req.query);
+    console.log('auth_first', req.query.query);
     const paginate: IPaginateProps = { from, size: parseInt(`${size}`), type };
+
+    // if (!req.currentUser && req.query) {
+    //   throw new NotAuthorizedError('you must be logged in to perform filter', 'auth-service gigs method() error ');
+    // }
+
     const gigs: ISearchResult = await gigBySearch(
       `${req.query.query}`,
       paginate,

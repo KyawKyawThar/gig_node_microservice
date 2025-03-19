@@ -24,7 +24,7 @@ class CurrentUser {
   public async resendEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const response = await authService.resendEmail(req.body);
-      res.status(StatusCodes.OK).json({ message: response.data.message, user: response.data.user });
+      res.status(StatusCodes.OK).json({ message: response.data.message });
       logger.info('Resend email has been sent successfully');
     } catch (error) {
       next(error);
@@ -33,17 +33,19 @@ class CurrentUser {
 
   public async getLoggedInUser(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const response = await gateCache.getLoggedInUsersFromCache('loggedInUser');
+      const response = await gateCache.getLoggedInUsersFromCache('loggedInUsers');
+
+      console.log('response is:', response);
       socketIO.emit('online', response);
-      console.log('kkt logged in user', response);
-      res.status(StatusCodes.OK).json({ message: 'User is online' });
+
+      res.status(StatusCodes.OK).json({ message: 'User is online', data: response });
     } catch (error) {
       next(error);
     }
   }
   public async removeLoggedInUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const response = await gateCache.removeLoggedInUserFromCache('removeLoggedInUser', req.params.username);
+      const response = await gateCache.removeLoggedInUserFromCache('loggedInUsers', req.params.username);
       socketIO.emit('online', response);
       res.status(StatusCodes.OK).json({ message: 'User is offline' });
     } catch (error) {

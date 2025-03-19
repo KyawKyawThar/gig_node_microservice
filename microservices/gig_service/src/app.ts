@@ -16,7 +16,7 @@ function cloudinaryConfig(): void {
 const initialize = async (): Promise<void> => {
   cloudinaryConfig();
   const app: Express = express();
-  databaseConnection();
+  await databaseConnection();
   start(app);
   await createRedisConnection();
 };

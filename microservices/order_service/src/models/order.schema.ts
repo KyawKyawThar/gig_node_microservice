@@ -12,7 +12,7 @@ const orderSchema: Schema = new Schema(
       newDeliveryDate: { type: Date },
       accepted: { type: Boolean, required: true },
       cancelled: { type: Boolean, required: true },
-      reason: { type: String, default: '' }
+      reason: { type: String, required: true }
     },
     gigId: { type: String, required: true },
     sellerId: { type: String, required: true, index: true },

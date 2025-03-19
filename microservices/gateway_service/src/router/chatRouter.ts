@@ -11,14 +11,16 @@ class ChatRoute {
   }
 
   public routes(): Router {
-    this.router.get('/message/conversation/:senderUsername/:receiverUsername', Get.prototype.getConversation);
-    this.router.get('/message/conversations/:username', Get.prototype.getConversationList);
-    this.router.get('/message/:senderUsername/:receiverUsername', Get.prototype.getMessages);
-    this.router.get('/message/:conversationId', Get.prototype.getUserMessage);
     this.router.post('/message', Create.prototype.createMessage);
-    this.router.put('/message/offer', Update.prototype.updateOffer);
-    this.router.put('/message/mark-as-read', Update.prototype.markSingleMessage);
+    this.router.get('/message/:senderUsername/:receiverUsername', Get.prototype.getMessages);
+    this.router.get('/message/conversation/:senderUsername/:receiverUsername', Get.prototype.getConversation);
+    this.router.get('/message/:conversationId', Get.prototype.getUserMessage);
+    this.router.get('/message/conversations/list/:username', Get.prototype.getConversationList);
     this.router.put('/message/mark-multiple-as-read', Update.prototype.markMultipleMessages);
+    this.router.put('/message/mark-as-read', Update.prototype.markSingleMessage);
+
+    this.router.put('/message/offer', Update.prototype.updateOffer);
+
     return this.router;
   }
 }

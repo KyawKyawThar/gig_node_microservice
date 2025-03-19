@@ -6,7 +6,7 @@ export abstract class CustomError extends Error {
   abstract status: string;
   comingFrom: string;
 
-  constructor(message: string, comingFrom: string) {
+  protected constructor(message: string, comingFrom: string) {
     super(message);
     this.comingFrom = comingFrom;
   }

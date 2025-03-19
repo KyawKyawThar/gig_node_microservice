@@ -8,17 +8,17 @@ export function verifyAuthGatewayRequest(req: Request, _res: Response, next: Nex
   const token = req.headers?.gatewaytoken as string;
 
   if (!token) {
-    throw new NotAuthorizedError('Token is not valid from api gateway', 'verifyAuthGatewayRequest() method');
+    return next(new NotAuthorizedError('Token is not valid from api gateway', 'verifyAuthGatewayRequest() method'));
   }
 
   try {
     const payload: { id: string; iat: number } = JWT.verify(token, config.GATEWAY_JWT_TOKEN) as { id: string; iat: number };
 
     if (payload.id !== config.AUTH) {
-      return new NotAuthorizedError('Request is not for auth service', 'verifyAuthGatewayRequest() method');
+      return next(new NotAuthorizedError('Request is not for auth service', 'verifyAuthGatewayRequest() method'));
     }
   } catch (error) {
-    throw new NotAuthorizedError('Request payload is invalid', 'verifyAuthGatewayRequest() method');
+    return next(new NotAuthorizedError('Request payload is invalid', 'verifyAuthGatewayRequest() method'));
   }
 
   next();

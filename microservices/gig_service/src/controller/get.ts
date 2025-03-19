@@ -53,6 +53,7 @@ export const sellerInactiveGigs = async (req: Request, res: Response, next: Next
 export const gigByCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const category = await getUserSelectedCache(`selectedCategories:${req.params.username}`);
+
     const gig = await gigsSearchByCategory(category);
     if (!Object.keys(gig).length) {
       throw new NotFoundError('seller inactive gig does not exist with this id', 'gig-service sellerInactiveGigs() method: error');
@@ -64,6 +65,7 @@ export const gigByCategory = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
+
 export const topRatedGigsByCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const category = await getUserSelectedCache(`selectedCategories:${req.params.username}`);

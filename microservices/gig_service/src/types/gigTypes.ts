@@ -189,33 +189,6 @@ export interface ISellerGig {
   sortId?: number;
   toJSON?: () => unknown;
 }
-export interface UpdateISellerGig {
-  _id?: string;
-  // this "id" property is used because elastcisearch does not accept a key with an underscore "_id"
-  // elasticsearch has _id as a reserved field name
-  id?: string;
-  sellerId?: string | ObjectId;
-  title?: string;
-  username?: string;
-  profilePicture?: string;
-  email?: string;
-  description?: string;
-  active?: boolean;
-  categories?: string;
-  subCategories?: string[];
-  tags?: string[];
-  ratingsCount?: number; // make sure to add this to elasticsearch as a double
-  ratingSum?: number; // make sure to add this to elasticsearch as a double
-  ratingCategories?: IRatingCategories;
-  expectedDelivery?: string;
-  basicTitle?: string;
-  basicDescription?: string;
-  price?: number;
-  coverImage?: string;
-  createdAt?: Date | string;
-  sortId?: number;
-  toJSON?: () => unknown;
-}
 
 export interface ILanguage {
   [key: string]: string | number | undefined;

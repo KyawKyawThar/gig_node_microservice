@@ -1,12 +1,9 @@
 import http from 'http';
-import { EventEmitter } from 'events';
 
+import cookieParser from 'cookie-parser';
 import { Application, json, urlencoded, Request, Response, NextFunction } from 'express';
 import { Logger } from 'winston';
-import { HttpStatusCode, isAxiosError } from 'axios';
 import { winstonLogger } from '@gateway/logger';
-import { AxiosErrorWithServiceName, IErrorResponse } from '@gateway/types/errorHandlerTypes';
-import { CustomError } from '@gateway/errorHandler';
 import { config } from '@gateway/config';
 import cookieSession from 'cookie-session';
 import helmet from 'helmet';
@@ -21,6 +18,11 @@ import { axiosSellerInstance } from '@gateway/services/api/sellerService';
 import { axiosGigInstance } from '@gateway/services/api/gigService';
 import { Server } from 'socket.io';
 import { axiosChatInstance } from '@gateway/services/api/chatService';
+import { axiosOrderInstance } from '@gateway/services/api/orderService';
+import { axiosReviewInstance } from '@gateway/services/api/reviewService';
+import { createClient } from 'redis';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { SocketIOAppHandler } from '@gateway/socket/socket';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway server', 'debug');
 
@@ -38,13 +40,12 @@ export class GateWayService {
     this.standardMiddleware(this.app);
     this.routerMiddleware(this.app);
     this.startElasticSearch();
-    this.errorHandler(this.app);
     this.startServer(this.app);
   }
 
   private securityMiddleware(app: Application): void {
     app.set('trust proxy', '1');
-
+    app.use(cookieParser());
     //IMPORTANT NOTE: be careful using SECRET_KEY_ONE and SECRET_KEY_TWO  enable key rotation.
     app.use(
       cookieSession({
@@ -70,6 +71,8 @@ export class GateWayService {
         axiosSellerInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
         axiosGigInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
         axiosChatInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
+        axiosOrderInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
+        axiosReviewInstance.defaults.headers['authorization'] = `Bearer ${req.session?.jwt}`;
       }
 
       next();
@@ -92,101 +95,41 @@ export class GateWayService {
     await elasticSearch.checkConnection();
   }
 
-  private errorHandler(app: Application): void {
-    // Handle invalid endpoints
-
-    app.use('*', (req: Request, res: Response, next: NextFunction) => {
-      const fullURL = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-
-      logger.error(`gateway service: ${fullURL} endpoint is not valid`);
-
-      res.status(HttpStatusCode.BadRequest).json({ message: 'The end point called does not exist' });
-      next();
-    });
-
-    // Global error handler
-    app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-      if (err instanceof CustomError) {
-        res.status(err.statusCode).json(err.serializeError());
-      }
-
-      if (isAxiosError(err)) {
-        const axiosError = err as AxiosErrorWithServiceName;
-        const serviceName = axiosError.serviceName || 'unknown-service';
-
-        if (axiosError.code === 'ECONNREFUSED') {
-          logger.log('error', `GatewayService Axios Error - ${serviceName}: Service is not reachable.`);
-          return res.status(503).json({ message: `${serviceName} service is not reachable or started.` });
-        }
-
-        // logger.log('error', `GatewayService Axios Error - ${serviceName} service:`, axiosError.response?.data);
-        // return res.status(axiosError.response?.status ?? 500).json({
-        //   message: axiosError.response?.data || 'Error occurred.',
-        //   service: serviceName
-        // });
-        res.status(err?.response?.data?.statusCode ?? 500).json({ message: err?.response?.data?.message ?? 'Something went wrong..' });
-      }
-
-      // console.log('ttt', err?.response?.data?.message);
-      // res.status(500).json({
-      //   message: 'An unexpected error occurred.',
-      //   error: err.data
-      // });
-
-      next();
-    });
-  }
-
   private async startServer(app: Application): Promise<void> {
     try {
-      const emitter = new EventEmitter();
-      logger.info('info', `get event max listener: ${emitter.getMaxListeners()}`);
       const httpServer: http.Server = new http.Server(app);
-      logger.log('info', 'HTTP Server created successfully');
-      //const socketServer = await this.createSocketIOServer(httpServer);
-      //logger.log('info', 'Socket.IO Server created successfully', socketServer);
+      // logger.log('info', 'HTTP Server created successfully');
+      //
+      const socketServer = await this.createSocketIOServer(httpServer);
 
       await this.startHTTPServer(httpServer);
-      logger.log('info', 'HTTP Server started successfully');
 
-      // this.socketIOConnection(socketServer);
-      // logger.log('info', 'Socket.IO Connection initialized');
+      this.socketIOConnection(socketServer);
+      logger.log('info', 'Socket.IO Connection initialized');
+
+      logger.log('info', 'HTTP Server started successfully');
     } catch (err) {
       logger.log('error', 'Gateway service startServer() method error: ', err);
     }
   }
 
   //createSocketIOServer will add after Client URL is established
-  // private async createSocketIOServer(httpServer: http.Server): Promise<Server> {
-  //   try {
-  //     const io: Server = new Server(httpServer, {
-  //       cors: {
-  //         origin: `${config.CLIENT_BASE_URL}`,
-  //         credentials: true,
-  //         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-  //       }
-  //     });
-  //     pubClient = createClient({ url: config.REDIS_HOST });
-  //     subClient = pubClient.duplicate();
-  //     Promise.all([pubClient.connect(), subClient.connect()]);
-  //     io.adapter(createAdapter(pubClient, subClient));
-  //     socketIO = io;
-
-  //     return io;
-  //   } catch (error) {
-  //     console.error('Failed to initialize Socket.IO server:', error);
-
-  //     if (pubClient && pubClient.isOpen) {
-  //       await pubClient.disconnect();
-  //     }
-
-  //     if (subClient && subClient.isOpen) {
-  //       await subClient.disconnect();
-  //     }
-
-  //     throw new Error('Socket.IO server Redis initialization failed');
-  //   }
-  // }
+  private async createSocketIOServer(httpServer: http.Server): Promise<Server> {
+    const io: Server = new Server(httpServer, {
+      cors: {
+        origin: `${config.CLIENT_BASE_URL}`,
+        //credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+      }
+    });
+    //  from socketIO-redis adapter
+    const pubClient = createClient({ url: config.REDIS_HOST });
+    const subClient = pubClient.duplicate();
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    io.adapter(createAdapter(pubClient, subClient));
+    socketIO = io;
+    return io;
+  }
 
   private async startHTTPServer(httpServer: http.Server): Promise<void> {
     try {
@@ -203,8 +146,8 @@ export class GateWayService {
     }
   }
 
-  // private socketIOConnection(io: Server): void {
-  //   const adapter = new SocketIOAppHandler(io);
-  //   adapter.listen();
-  // }
+  private socketIOConnection(io: Server): void {
+    const adapter = new SocketIOAppHandler(io);
+    adapter.listen();
+  }
 }

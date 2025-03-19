@@ -3,7 +3,7 @@ import { config } from '@gig/config';
 import { winstonLogger } from '@gig/logger';
 import { createClient } from 'redis';
 
-const logger: Logger = winstonLogger(config.ELASTIC_SEARCH_URL, 'gigServiceQueue', 'debug');
+const logger: Logger = winstonLogger(config.ELASTIC_SEARCH_URL, 'gigRedisConnection', 'debug');
 
 type redisClient = ReturnType<typeof createClient>;
 

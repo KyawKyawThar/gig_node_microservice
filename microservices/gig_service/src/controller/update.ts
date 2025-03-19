@@ -3,19 +3,19 @@ import { config } from '@gig/config';
 import { BadRequestError, NotFoundError } from '@gig/errorHandler';
 import { winstonLogger } from '@gig/logger';
 import { updateActiveGig, updateGig } from '@gig/services/gig.service';
-import { UpdateISellerGig } from '@gig/types/gigTypes';
 import { UploadApiResponse } from 'cloudinary';
 import { NextFunction, Request, Response } from 'express';
 import { isDataURL } from 'helper';
 import { StatusCodes } from 'http-status-codes';
-//import { gigUpdateSchema } from 'schema/gig';
+
 import { Logger } from 'winston';
+import { ISellerGig } from '@gig/types/gigTypes';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gig-service', 'debug');
 export const gigsByUpdate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // const { error } = gigUpdateSchema.validate(req.body);
-
+    //
     // if (error?.details) {
     //   throw new BadRequestError(error.details[0].message, 'gig-service gigsByUpdate() method error');
     // }
@@ -37,7 +37,7 @@ export const gigsByUpdate = async (req: Request, res: Response, next: NextFuncti
       coverImage = req.body.coverImage;
     }
 
-    const gig: UpdateISellerGig = {
+    const gig: ISellerGig = {
       title: req.body.title,
       description: req.body.description,
       categories: req.body.categories,
@@ -68,7 +68,7 @@ export const activeUpdateGigs = async (req: Request, res: Response, next: NextFu
 
     const result = await updateActiveGig(gigId, req.body.active);
 
-    if (!Object.keys(result).length) {
+    if (!result) {
       throw new NotFoundError('gig can not be updated with this gigId', 'gig-service activeUpdateGigs() method: error');
     }
     res.status(StatusCodes.OK).json({ message: 'Gig updated successfully', gig: result });

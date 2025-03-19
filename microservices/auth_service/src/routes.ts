@@ -9,7 +9,7 @@ import { searchRouter } from './router/search';
 import { seedRouter } from './router/seed';
 
 export function appRoutes(app: Application): void {
-  app.use(config.BASE_PATH, healthRouter());
+  app.use('', healthRouter());
   app.use(config.BASE_PATH, searchRouter());
 
   app.use(config.BASE_PATH, verifyAuthGatewayRequest, authRouter());

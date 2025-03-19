@@ -12,7 +12,7 @@ export class Get {
     try {
       const { senderUsername, receiverUsername } = req.params;
       const response = await chatService.getConversation(senderUsername, receiverUsername);
-      res.status(StatusCodes.OK).json({ message: response.data.messages, conversation: response.data.result });
+      res.status(StatusCodes.OK).json({ message: response.data.messages, conversation: response.data.conversation });
       logger.info(response.data.message);
     } catch (error) {
       next(error);
@@ -32,6 +32,7 @@ export class Get {
   public async getConversationList(req: Request, res: Response, next: NextFunction) {
     try {
       const { username } = req.params;
+
       const response = await chatService.getConversationList(username);
       res.status(StatusCodes.OK).json({ message: response.data.message, conversationList: response.data.conversationList });
     } catch (error) {

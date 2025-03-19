@@ -12,7 +12,12 @@ class Signup {
     try {
       const response: AxiosResponse = await authService.signUp(req.body);
       req.session = { jwt: response.data.token };
-
+      res.cookie('refreshToken', response.data.refreshToken, {
+        httpOnly: true,
+        secure: config.NODE_ENV !== 'development',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
       res.status(StatusCodes.CREATED).json({ message: response.data.message, user: response.data.user });
 
       logger.info('signup successfully created');

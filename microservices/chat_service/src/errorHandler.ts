@@ -39,7 +39,7 @@ export class NotFoundError extends CustomError {
   }
 }
 
-export class UnAuthorizedError extends CustomError {
+export class NotAuthorizedError extends CustomError {
   statusCode = StatusCodes.UNAUTHORIZED;
   status = 'UnAuthorizedError';
 

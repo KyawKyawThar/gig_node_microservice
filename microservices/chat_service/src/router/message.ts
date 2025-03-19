@@ -6,13 +6,15 @@ import express, { Router } from 'express';
 const router = express.Router();
 
 export function messageRouter(): Router {
-  router.get('/conversation/:senderUsername/:receiverUsername', conversation);
   router.get('/:senderUsername/:receiverUsername', messages);
-  router.get('/conversations/:username', conversationList);
-  router.get('/:conversationId', userMessages);
   router.post('/', createMessage);
-  router.put('/offer', offer);
-  router.put('/mark-as-read', markSingleMessage);
+  router.get('/conversation/:senderUsername/:receiverUsername', conversation);
+  router.get('/:conversationId', userMessages);
+  router.get('/conversations/list/:username', conversationList);
   router.put('/mark-multiple-as-read', markMultipleMessages);
+  router.put('/mark-as-read', markSingleMessage);
+
+  router.put('/offer', offer);
+
   return router;
 }

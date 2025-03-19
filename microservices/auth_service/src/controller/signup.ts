@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { upload } from '@auth/cloudinaryUpload';
 import { BadRequestError, ServerError } from '@auth/errorHandler';
 import { signupSchema } from '@auth/schemes/signup';
-import { createUser, firstLetterUpperCase, getUserByEmailORUsername, signToken } from '@auth/services/auth.service';
+import { createUser, firstLetterUpperCase, getUserByEmailORUsername, signToken, userRefreshToken } from '@auth/services/auth.service';
 import { IAuthDocument, IEmailMessageDetails } from '@auth/types/authTypes';
 import { UploadApiResponse } from 'cloudinary';
 import { v4 as uuidv4 } from 'uuid';
@@ -87,8 +87,9 @@ export async function signUp(req: Request, res: Response, next: NextFunction): P
       'Verify email message has been sent to notification service.'
     );
     if (result) {
+      const refreshToken = userRefreshToken(result.id!, result.username!, result.email!);
       const userJWT = signToken(result.id!, result.username!, result.email!);
-      res.status(StatusCodes.OK).json({ message: 'User created successfully', user: result, token: userJWT });
+      res.status(StatusCodes.OK).json({ message: 'User created successfully', user: result, token: userJWT, refreshToken });
       logger.info('User created successfully....');
     }
   } catch (error) {

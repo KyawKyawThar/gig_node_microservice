@@ -27,6 +27,8 @@ export async function getEmail(req: Request, res: Response, next: NextFunction):
 export async function getCurrentUsername(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const currentUsername = await getUserByUsername(req.currentUser.username);
+
+    logger.info('currentUsername', currentUsername);
     if (!currentUsername) {
       throw new NotFoundError('buyer not found', 'buyer-service currentUsername() method error');
     }

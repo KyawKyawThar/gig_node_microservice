@@ -25,21 +25,15 @@ export const messageSchema = Joi.object().keys({
     'string.empty': 'Sender username is required',
     'any.required': 'Sender username is required'
   }),
-  senderPicture: Joi.string().required().messages({
-    'string.base': 'Sender picture is required',
-    'string.empty': 'Sender picture is required',
-    'any.required': 'Sender picture is required'
-  }),
+
   receiverUsername: Joi.string().required().messages({
     'string.base': 'Receiver username is required',
     'string.empty': 'Receiver username is required',
     'any.required': 'Receiver username is required'
   }),
-  receiverPicture: Joi.string().required().messages({
-    'string.base': 'Receiver picture is required',
-    'string.empty': 'Receiver picture is required',
-    'any.required': 'Receiver picture is required'
-  }),
+
+  senderPicture: Joi.string().optional(),
+  receiverPicture: Joi.string().optional(),
   isRead: Joi.boolean().optional(),
   hasOffer: Joi.boolean().optional(),
   offer: Joi.object({

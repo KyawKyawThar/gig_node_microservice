@@ -10,7 +10,8 @@ export class Update {
   public async updateOffer(req: Request, res: Response, next: NextFunction) {
     try {
       const response = await chatService.updateOffer(req.body);
-      res.status(StatusCodes.OK).json({ message: response.data.message, singleMessage: response.data.result });
+      // console.log('chat offer updated', response.data.result);
+      res.status(StatusCodes.OK).json({ message: response.data.message, offerUpdated: response.data.offerUpdate });
       logger.info(response.data.message);
     } catch (error) {
       next(error);
@@ -31,6 +32,7 @@ export class Update {
   public async markSingleMessage(req: Request, res: Response, next: NextFunction) {
     try {
       const { messageId } = req.body;
+
       const response = await chatService.markSingleMessage(messageId);
       res.status(StatusCodes.OK).json({ message: response.data.message, singleMessage: response.data.singleMessage });
       logger.info(response.data.message);

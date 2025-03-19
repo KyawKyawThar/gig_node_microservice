@@ -1,7 +1,7 @@
 import { Logger } from 'winston';
 import { winstonLogger } from './logger';
 import { config } from './config';
-import { Application, NextFunction, Request, Response, json, urlencoded } from 'express';
+import { Application, json, NextFunction, Request, Response, urlencoded } from 'express';
 import { Server } from 'socket.io';
 import { Channel } from 'amqplib';
 import hpp from 'hpp';
@@ -97,8 +97,7 @@ function chatErrorHandler(app: Application) {
 function startServer(app: Application): void {
   try {
     const server = new http.Server(app);
-    const socketServer = createSockIOServer(server);
-    socketIOChatObject = socketServer;
+    socketIOChatObject = createSockIOServer(server);
     startHttpServer(server);
   } catch (error) {
     logger.log('error', 'chat service startServer() method error', error);
@@ -106,14 +105,12 @@ function startServer(app: Application): void {
 }
 
 function createSockIOServer(httpServer: http.Server): Server {
-  const io = new Server(httpServer, {
+  return new Server(httpServer, {
     cors: {
       origin: '*',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
     }
   });
-
-  return io;
 }
 
 function startHttpServer(server: http.Server): void {

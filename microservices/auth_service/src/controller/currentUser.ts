@@ -60,7 +60,7 @@ export async function resendEmail(req: Request, res: Response, next: NextFunctio
     const randomByte = crypto.randomBytes(20);
     const randomCharacter = randomByte.toString('hex');
 
-    const verifyEmailLink = `${config.CLIENT_URL}/confirm_email?v_token=${randomCharacter}`;
+    const verifyEmailLink = `${config.CLIENT_URL}/confirm_email?token=${randomCharacter}`;
 
     const messageDetail: IEmailMessageDetails = {
       receiverEmail: email,
@@ -78,9 +78,7 @@ export async function resendEmail(req: Request, res: Response, next: NextFunctio
 
     await updateVerifyEmail(user.id!, 0, randomCharacter);
 
-    const updateUser = await getUserByID(user.id!);
-
-    res.status(StatusCodes.CREATED).json({ message: 'Email verification sent', user: updateUser });
+    res.status(StatusCodes.CREATED).json({ message: 'Email verification sent' });
   } catch (error) {
     // console.log('error is:', error);
     next(error);

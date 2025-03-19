@@ -1,7 +1,7 @@
 This repo contains all codes for the ECommerce freelance marketplace application.
 
 ### API Documentation
-- [Postman API Documentation](https://documenter.getpostman.com/view/10197229/2sAY4uEPb2)
+- [Postman API Documentation](https://documenter.getpostman.com/view/10197229/2sAYkEqKYs)
 
 ### Microservices
 * The `microservices` folder contains all the backend code for the application's services.

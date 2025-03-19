@@ -2,7 +2,7 @@ import { config } from '@auth/config';
 import { winstonLogger } from '@auth/logger';
 import { NextFunction, Request, Response } from 'express';
 import { Logger } from 'winston';
-import { getUserByUsername, signToken } from '@auth/services/auth.service';
+import { getUserByUsername, signToken, userRefreshToken } from '@auth/services/auth.service';
 import { BadRequestError, ServerError } from '@auth/errorHandler';
 import { StatusCodes } from 'http-status-codes';
 import { DatabaseError } from 'sequelize';
@@ -13,7 +13,7 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth-serve
 //can also add expired time in token
 export async function refreshToken(req: Request, res: Response, next: NextFunction) {
   try {
-    const result = await getUserByUsername(req.params.username);
+    const result = await getUserByUsername(req.currentUser.username);
 
     if (result instanceof DatabaseError) {
       logger.error(`SQL Error Message: ${result.original.message}`);
@@ -25,7 +25,8 @@ export async function refreshToken(req: Request, res: Response, next: NextFuncti
       throw new BadRequestError('user does not exist', 'auth-service currentUser method() error');
     }
     const token = signToken(checkExistingUser.id!, checkExistingUser.username!, checkExistingUser.email!);
-    res.status(StatusCodes.OK).json({ message: 'refresh token has been generated successfully', user: token });
+    const refreshToken = userRefreshToken(checkExistingUser.id!, checkExistingUser.username!, checkExistingUser.email!);
+    res.status(StatusCodes.OK).json({ message: 'refresh token has been generated successfully', accessToken: token, refreshToken });
     logger.info('Sending refresh token request is successfully');
   } catch (error) {
     next(error);

@@ -17,6 +17,7 @@ export const createConversation = async (conversationId: string, sender: string,
 export const addMessage = async (message: IMessageDocument): Promise<IMessageDocument> => {
   const create = (await messageModel.create(message)) as IMessageDocument;
 
+  console.log('addMessage...', create);
   const emailMessageDetail: IMessageDetails = {
     sender: message.senderUsername,
     amount: message.offer?.price,
@@ -57,17 +58,20 @@ export const getConversation = async (sender: string, receiver: string): Promise
 
 export const getUserConversationList = async (username: string): Promise<IMessageDocument[]> => {
   const query = {
-    $or: [{ senderUsername: username, receiverUsername: username }]
+    $or: [
+      { senderUsername: username }, // Match documents where senderUsername is 'Manny'
+      { receiverUsername: username } // Match documents where receiverUsername is 'Manny'
+    ]
   };
 
-  const conversationLists: IMessageDocument[] = await conversationModel.aggregate([
+  const conversationLists: IMessageDocument[] = await messageModel.aggregate([
     { $match: query },
     {
       $group: {
         _id: '$conversationId',
         result: {
           $top: {
-            output: '$$Root',
+            output: '$$ROOT',
             sortBy: { createdAt: -1 }
           }
         }
@@ -75,7 +79,7 @@ export const getUserConversationList = async (username: string): Promise<IMessag
     },
     {
       $project: {
-        _id: '$result.id',
+        _id: '$result._id',
         conversationId: '$result.conversationId',
         sellerId: '$result.sellerId',
         buyerId: '$result.buyerId',
@@ -130,7 +134,7 @@ export const updateOffer = async (messageId: string, type: string): Promise<IMes
 };
 
 export const markMessageAsRead = async (messageId: string): Promise<IMessageDocument> => {
-  const readMessage = (await messageModel.findOneAndUpdate(
+  const readMessage = (await messageModel.findByIdAndUpdate(
     {
       _id: messageId
     },
@@ -138,8 +142,11 @@ export const markMessageAsRead = async (messageId: string): Promise<IMessageDocu
       $set: {
         isRead: true
       }
-    }
+    },
+    { new: true }
   )) as IMessageDocument;
+
+  socketIOChatObject.emit('update message', readMessage);
 
   return readMessage;
 };
@@ -149,7 +156,8 @@ export const markManyMessagesAsRead = async (messageId: string, sender: string, 
     {
       _id: messageId,
       senderUsername: sender,
-      receiverUsername: receiver
+      receiverUsername: receiver,
+      isRead: false
     },
     {
       $set: {
@@ -160,6 +168,6 @@ export const markManyMessagesAsRead = async (messageId: string, sender: string, 
 
   const result = (await messageModel.findOne({ _id: messageId })) as IMessageDocument;
 
-  socketIOChatObject.emit('update messages', result);
+  socketIOChatObject.emit('update message', result);
   return result;
 };

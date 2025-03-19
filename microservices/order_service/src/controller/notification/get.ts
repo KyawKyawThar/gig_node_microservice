@@ -9,9 +9,8 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'order_serv
 
 export const notification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { userToId } = req.params;
-    const result = await getNotificationsById(userToId);
-
+    const { userTo } = req.params;
+    const result = await getNotificationsById(userTo);
     res.status(StatusCodes.OK).json({ message: 'Notifications', notification: result });
 
     logger.info('order_service get notifications successfully');
