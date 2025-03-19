@@ -25,11 +25,16 @@ const stripe = new Stripe(config.STRIPE_API_KEY, { typescript: true });
 
 export const cancel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    console.log('request cancelled is:', req.body.paymentIntentId);
+
+    // throw new BadRequestError('this is custom error', 'Create order() method');
     await stripe.refunds.create({
-      payment_intent: req.body.paymentIntent
+      payment_intent: `${req.body.paymentIntentId}`
     });
+
     const { orderId } = req.params;
     const cancelData = req.body.orderData;
+
     await cancelOrder(orderId, cancelData);
     res.status(StatusCodes.OK).json({ message: 'Order Canceled Successfully' });
     logger.info('Order Canceled Successfully');
@@ -41,11 +46,12 @@ export const requestExtension = async (req: Request, res: Response, next: NextFu
   try {
     const { error } = orderUpdateSchema.validate(req.body);
     if (error?.details) {
-      new BadRequestError(error.details[0].message, 'auth-service signUp create() method error');
+      throw new BadRequestError(error.details[0].message, 'order-service requestExtension() method error');
     }
 
     const order = await requestDeliveryExtension(req.params.orderId, req.body);
     res.status(StatusCodes.OK).json({ message: 'Order delivery request', order });
+    logger.info('Request Extension successfully');
   } catch (err) {
     next(err);
   }
@@ -53,15 +59,20 @@ export const requestExtension = async (req: Request, res: Response, next: NextFu
 
 export const deliveryDate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { error } = orderUpdateSchema.validate(req.body);
-    if (error?.details) {
-      throw new BadRequestError(error.details[0].message, 'auth-service signUp create() method error');
-    }
     const { orderId, type } = req.params;
+
+    if (type === 'approve') {
+      const { error } = orderUpdateSchema.validate(req.body);
+      if (error?.details) {
+        throw new BadRequestError(error.details[0].message, 'auth-service signUp create() method error');
+      }
+    }
 
     const order = type === 'approve' ? await approveDeliveryDate(orderId, req.body) : await rejectDeliveryDate(orderId);
 
     res.status(StatusCodes.OK).json({ message: 'Order delivery date extension', order });
+
+    logger.info('Delivery Date has been update successfully');
   } catch (err) {
     next(err);
   }
@@ -72,6 +83,8 @@ export const buyerApproveOrder = async (req: Request, res: Response, next: NextF
     const order = await approveOrder(req.params.orderId, req.body);
 
     res.status(StatusCodes.OK).json({ message: 'Order approved successfully', order });
+
+    logger.info('Order approved successfully');
   } catch (err) {
     next(err);
   }
@@ -105,6 +118,8 @@ export const deliverOrder = async (req: Request, res: Response, next: NextFuncti
       fileSize: req.body.fileSize
     };
     const order = await sellerDeliverOrder(orderId, true, data);
+
+    logger.info('Order delivery successfully', order);
     res.status(StatusCodes.OK).json({ message: 'Order delivered successfully.', order });
   } catch (err) {
     next(err);

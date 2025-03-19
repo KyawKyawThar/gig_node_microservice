@@ -8,7 +8,9 @@ export const createNotification = async (data: IOrderNotification): Promise<IOrd
   return await notificationModel.create(data);
 };
 export const getNotificationsById = async (userToId: string): Promise<IOrderNotification[]> => {
-  return await notificationModel.aggregate([{ $match: { userToId } }]);
+  console.log('userToId', userToId);
+
+  return notificationModel.aggregate([{ $match: { userToId } }]);
 };
 
 export const markNotificationAsRead = async (notificationId: string): Promise<IOrderNotification> => {
@@ -19,7 +21,7 @@ export const markNotificationAsRead = async (notificationId: string): Promise<IO
     { new: true }
   )) as IOrderNotification;
 
-  const orderNotification = await orderModel.findById({ orderId: notification.orderId });
+  const orderNotification = await orderModel.findOne({ orderId: notification.orderId });
 
   socketIOOrderObject.emit('order notification', orderNotification, notification);
   return notification;

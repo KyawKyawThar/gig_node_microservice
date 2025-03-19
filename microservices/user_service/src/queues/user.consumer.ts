@@ -73,7 +73,7 @@ export const consumeSellerDirectMessage = async (channel: Channel): Promise<void
       await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
         if (msg) {
           const { type, count, sellerId, ongoingJobs, completedJobs, totalEarnings, recentDelivery } = JSON.parse(msg!.content.toString());
-
+          console.log('user-consumer type is:', type);
           switch (type) {
             case 'create-order':
               await updateSellerOngoingJobsProp(sellerId, ongoingJobs);
@@ -112,7 +112,7 @@ export const consumeReviewFanoutDirectMessage = async (channel: Channel): Promis
       await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
         if (msg) {
           const buyerReview = JSON.parse(msg!.content.toString());
-
+          logger.info('consumeReviewFanoutDirectMessage');
           if (buyerReview.type === 'buyer-review') {
             await updateSellerReview(buyerReview);
 

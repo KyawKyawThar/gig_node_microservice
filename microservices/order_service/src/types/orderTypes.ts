@@ -147,3 +147,13 @@ export interface IReviewMessageDetails {
   createdAt?: string;
   type: string;
 }
+
+interface StripeError extends Error {
+  type?: string;
+  code?: string;
+  statusCode?: number;
+}
+
+export const IsStripeError = (err: unknown): err is StripeError => {
+  return err instanceof Error && 'type' in err;
+};

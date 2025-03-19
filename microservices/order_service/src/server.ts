@@ -1,38 +1,45 @@
-import http from 'http';
+import { winstonLogger } from '@order/logger';
+import { config } from '@order/config';
+import { Application, Response, Request, NextFunction, json, urlencoded } from 'express';
 
-import { Channel } from 'amqplib';
+import http from 'http';
+import * as process from 'node:process';
 import { Server } from 'socket.io';
-import { config } from './config';
-import { winstonLogger } from './logger';
-import { Application, NextFunction, Request, Response, json, urlencoded } from 'express';
-import { verify } from 'jsonwebtoken';
+import { Channel } from 'amqplib';
+import { appRoutes } from '@order/route';
+import { checkConnection } from '@order/elasticSearch';
+import { createOrderConnection } from '@order/queue/connection';
+import { consumerReviewFanoutMessages } from '@order/queue/order.consumer';
 import hpp from 'hpp';
 import helmet from 'helmet';
-import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import { IOrderPayload } from './types/orderTypes';
-import { checkConnection } from './elasticSearch';
-import { createConnection } from './queue/connection';
+import cors from 'cors';
+import { verify } from 'jsonwebtoken';
+import { IOrderPayload } from '@order/types/orderTypes';
+import { IErrorResponse } from '@order/types/errorHandlerTypes';
+import { CustomError } from '@order/errorHandler';
 import compression from 'compression';
-import { appRoutes } from './route';
-import { IErrorResponse } from './types/errorHandlerTypes';
-import { CustomError } from './errorHandler';
-import { consumerReviewFanoutMessages } from '@order/queue/order.consumer';
+import { StatusCodes } from 'http-status-codes';
 
 const logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'orderService', 'debug');
 
 export let socketIOOrderObject: Server;
 export let orderChannel: Channel;
-
-export function start(app: Application) {
-  startQueue();
-  startElasticSearch();
+export async function start(app: Application) {
+  await startElasticSearch();
+  await startQueue();
 
   securityMiddleware(app);
   standardMiddleware(app);
   routerMiddleware(app);
   orderErrorHandler(app);
   startServer(app);
+}
+
+function standardMiddleware(app: Application) {
+  app.use(compression());
+  app.use(json({ limit: '200mb' }));
+  app.use(urlencoded({ extended: true, limit: '200mb' }));
 }
 
 function securityMiddleware(app: Application) {
@@ -66,29 +73,37 @@ function securityMiddleware(app: Application) {
     next();
   });
 }
+
 async function startElasticSearch() {
   await checkConnection();
 }
 
 async function startQueue() {
-  orderChannel = (await createConnection()) as Channel;
+  orderChannel = (await createOrderConnection()) as Channel;
   await consumerReviewFanoutMessages(orderChannel);
-}
-
-function standardMiddleware(app: Application) {
-  app.use(compression());
-  app.use(json({ limit: '200mb' }));
-  app.use(urlencoded({ extended: true, limit: '200mb' }));
 }
 
 function routerMiddleware(app: Application) {
   appRoutes(app);
 }
+
+function createSockIOServer(httpServer: http.Server): Server {
+  return new Server(httpServer, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    }
+  });
+}
+
 function orderErrorHandler(app: Application) {
   app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
     logger.error(`order server orderErrorHandler ${err.comingFrom}`);
+
     if (err instanceof CustomError) {
-      return res.status(err.statusCode).json(err?.serializeError());
+      res.status(err.statusCode).json(err.message);
+    } else {
+      res.status(StatusCodes.BAD_REQUEST).json(err.message);
     }
     next();
   });
@@ -100,32 +115,17 @@ function startServer(app: Application): void {
     socketIOOrderObject = createSockIOServer(server);
     startHttpServer(server);
   } catch (error) {
-    logger.log('error', 'order service startServer() method error', error);
+    logger.error('startServer error', 'order service startServer() method error', error);
   }
 }
-function createSockIOServer(httpServer: http.Server): Server {
-  const io = new Server(httpServer, {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-    }
-  });
 
-  return io;
-}
-
-function startHttpServer(server: http.Server): void {
+function startHttpServer(server: http.Server) {
   try {
-    logger.info(`order server has started with process id ${process.pid}`);
-
-    server.listen(config.ORDER_BASE_PATH, () => {
-      logger.info(`Order server is running on port ${config.ORDER_SERVER_PORT}`);
-    });
-
-    process.on('uncaughtException', (error) => {
-      logger.log('error', 'Unhandled error: ', error);
+    logger.info(`order service has started with process id ${process.pid}`);
+    server.listen(config.ORDER_SERVER_PORT, () => {
+      logger.info(`Order service is running on port ${config.ORDER_SERVER_PORT}`);
     });
   } catch (error) {
-    logger.log('error', 'order service startHttpServer() method error:', error);
+    logger.error('start httpServer error', error);
   }
 }

@@ -31,6 +31,7 @@ export const createOrder = async (data: IOrderDocument): Promise<IOrderDocument>
 
   // update seller info
   await publicDirectMessage(orderChannel, exchangeName, routingKey, JSON.stringify(messageDetail), 'Details sent to users service');
+
   const emailMessageDetail: IOrderMessage = {
     orderId: createOrder.orderId,
     invoiceId: createOrder.invoiceId,
@@ -41,6 +42,7 @@ export const createOrder = async (data: IOrderDocument): Promise<IOrderDocument>
     title: createOrder.offer.gigTitle,
     requirements: createOrder.requirements,
     serviceFee: `${createOrder.serviceFee}`,
+    receiverEmail: createOrder.buyerEmail,
     total: `${createOrder.price + createOrder.serviceFee!}`,
     orderUrl: `${config.CLIENT_URL}/orders/${createOrder.orderId}/activities`,
     template: 'orderPlaced'
@@ -165,6 +167,7 @@ export const sellerDeliverOrder = async (orderId: string, delivered: boolean, de
       sellerUsername: lowerCase(order.sellerUsername),
       title: order.offer.gigTitle,
       description: order.offer.description,
+      receiverEmail: order.buyerEmail,
       orderUrl: `${config.CLIENT_URL}/orders/${orderId}/activities`,
       template: 'orderDelivered'
     };
@@ -179,6 +182,7 @@ export const sellerDeliverOrder = async (orderId: string, delivered: boolean, de
     );
     await sendNotification(order.buyerUsername, order, 'delivered your order.');
   }
+
   return order;
 };
 
@@ -205,6 +209,7 @@ export const requestDeliveryExtension = async (orderId: string, data: IExtendedD
       originalDate: order.offer.oldDeliveryDate,
       newDate: order.offer.newDeliveryDate,
       reason: order.offer.reason,
+      receiverEmail: order.buyerEmail,
       orderUrl: `${config.CLIENT_URL}/orders/${orderId}/activities`,
       template: 'orderExtension'
     };
@@ -249,6 +254,7 @@ export const approveDeliveryDate = async (orderId: string, data: IExtendedDelive
       buyerUsername: lowerCase(order.buyerUsername),
       sellerUsername: lowerCase(order.sellerUsername),
       header: 'Request Accepted',
+      receiverEmail: order.buyerEmail,
       type: 'accepted',
       message: 'You can continue working on the order.',
       orderUrl: `${config.CLIENT_URL}/orders/${orderId}/activities`,
@@ -257,7 +263,7 @@ export const approveDeliveryDate = async (orderId: string, data: IExtendedDelive
     // send email
     await publicDirectMessage(
       orderChannel,
-      'jobber-order-notification',
+      'order-notification',
       'order-email',
       JSON.stringify(messageDetails),
       'Order request extension approval message sent to notification service.'
@@ -284,6 +290,7 @@ export const rejectDeliveryDate = async (orderId: string): Promise<IOrderDocumen
       { new: true }
     )
     .exec()) as IOrderDocument;
+
   if (order) {
     const messageDetails: IOrderMessage = {
       subject: 'Sorry: Your extension request was rejected',
@@ -291,6 +298,7 @@ export const rejectDeliveryDate = async (orderId: string): Promise<IOrderDocumen
       sellerUsername: lowerCase(order.sellerUsername),
       header: 'Request Rejected',
       type: 'rejected',
+      receiverEmail: order.buyerEmail,
       message: 'You can contact the buyer for more information.',
       orderUrl: `${config.CLIENT_URL}/orders/${orderId}/activities`,
       template: 'orderExtensionApproval'
@@ -298,7 +306,7 @@ export const rejectDeliveryDate = async (orderId: string): Promise<IOrderDocumen
     // send email
     await publicDirectMessage(
       orderChannel,
-      'jobber-order-notification',
+      'order-notification',
       'order-email',
       JSON.stringify(messageDetails),
       'Order request extension rejection message sent to notification service.'

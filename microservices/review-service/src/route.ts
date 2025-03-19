@@ -5,6 +5,6 @@ import { reviewRoutes } from '@review/router/review';
 import { verifyReviewGatewayRequest } from '@review/reviewMiddleware';
 
 export function appRoutes(app: Application) {
-  app.use(config.REVIEW_BASE_PATH, healthRouter);
+  app.use('', healthRouter());
   app.use(config.REVIEW_BASE_PATH, verifyReviewGatewayRequest, reviewRoutes());
 }

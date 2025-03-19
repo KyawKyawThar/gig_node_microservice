@@ -4,7 +4,7 @@ import amqplib, { Channel, Connection } from 'amqplib';
 
 const logger = winstonLogger(config.ELASTIC_SEARCH_URL, 'orderServiceQueue', 'debug');
 
-export async function createConnection(): Promise<Channel | undefined> {
+export async function createOrderConnection(): Promise<Channel | undefined> {
   try {
     const connection: Connection = await amqplib.connect(config.RABBITMQ_ENDPOINT);
 

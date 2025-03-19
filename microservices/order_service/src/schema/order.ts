@@ -6,10 +6,11 @@ const orderSchema: ObjectSchema = Joi.object().keys({
     price: Joi.number().required(),
     description: Joi.string().required(),
     deliveryInDays: Joi.number().required(),
-    oldDeliveryDate: Joi.string().required(),
-    newDeliveryDate: Joi.string().optional(),
+    oldDeliveryDate: Joi.date().required(),
+    newDeliveryDate: Joi.date().optional(),
     accepted: Joi.boolean().required(),
-    cancelled: Joi.boolean().required()
+    cancelled: Joi.boolean().required(),
+    reason: Joi.string().required() // Added missing field
   }).required(),
   gigId: Joi.string().required(),
   sellerId: Joi.string().required(),
@@ -39,32 +40,37 @@ const orderSchema: ObjectSchema = Joi.object().keys({
     reason: Joi.string().required()
   }).optional(),
   delivered: Joi.boolean().optional(),
-  approvedAt: Joi.string().optional(),
+  approvedAt: Joi.date().optional(),
   deliveredWork: Joi.array()
     .items(
       Joi.object({
         message: Joi.string(),
-        file: Joi.string()
+        file: Joi.string(),
+        fileType: Joi.string(), // Added missing field
+        fileSize: Joi.string(), // Added missing field
+        fileName: Joi.string() // Added missing field
       })
     )
     .optional(),
-  dateOrdered: Joi.string().optional(),
+  dateOrdered: Joi.date().optional(),
   events: Joi.object({
-    placeOrder: Joi.string(),
-    requirements: Joi.string(),
-    orderStarted: Joi.string(),
-    deliverydateUpdate: Joi.string().optional(),
-    orderDelivered: Joi.string().optional(),
-    buyerReview: Joi.string().optional(),
-    sellerReview: Joi.string().optional()
+    placeOrder: Joi.date(),
+    requirements: Joi.date(),
+    orderStarted: Joi.date(),
+    deliveryDateUpdate: Joi.date().optional(), // Corrected field name
+    orderDelivered: Joi.date().optional(),
+    buyerReview: Joi.date().optional(),
+    sellerReview: Joi.date().optional()
   }).optional(),
   buyerReview: Joi.object({
     rating: Joi.number(),
-    review: Joi.string()
+    review: Joi.string(),
+    created: Joi.date() // Added missing field
   }).optional(),
   sellerReview: Joi.object({
     rating: Joi.number(),
-    review: Joi.string()
+    review: Joi.string(),
+    created: Joi.date() // Added missing field
   }).optional()
 });
 

@@ -9,7 +9,7 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificati
 export async function sendEmail(template: string, receiveEmail: string, mailTransport: mailTransport): Promise<void> {
   try {
     await emailTemplate(template, receiveEmail, mailTransport);
-    logger.info('Sending email successfully', template, receiveEmail, mailTransport);
+    logger.log('Sending email successfully', template, receiveEmail, mailTransport);
   } catch (err) {
     logger.log('error', 'NotificationService mailTransportor sendEmail() metohd error ', err);
   }

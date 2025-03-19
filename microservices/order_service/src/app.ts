@@ -1,8 +1,10 @@
 import express, { Express } from 'express';
-import { start } from './server';
-import { databaseConnection } from './database';
-const initialize = () => {
+import { databaseConnection } from '@order/database';
+import { start } from '@order/server';
+
+const initialize = async () => {
   const app: Express = express();
+
   databaseConnection();
   start(app);
 };

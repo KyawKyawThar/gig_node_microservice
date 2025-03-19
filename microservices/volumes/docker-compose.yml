@@ -168,6 +168,21 @@ services:
     volumes:
       - ./docker_volumes/mysql:/var/lib/mysql
 
+  postgresql:
+    container_name: postgresql_container
+    image: postgres:16.2-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DATABASE}
+    networks:
+      - elastic
+    volumes:
+      - ./docker_volumes/postgres:/var/lib/postgresql/data
+
   mongodb:
     container_name: mongodb_container
     image: mongo:latest

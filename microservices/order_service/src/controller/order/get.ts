@@ -10,6 +10,8 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'order_serv
 export const orderId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { orderId } = req.params;
+
+    console.log('orderId is:', orderId);
     const order = await getOrderByOrderId(orderId);
     res.status(StatusCodes.OK).json({ message: 'Order by order id', orderId: order });
     logger.info('get order by id has been called successfully');

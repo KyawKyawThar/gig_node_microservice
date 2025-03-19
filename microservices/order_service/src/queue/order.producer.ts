@@ -2,7 +2,7 @@ import { Logger } from 'winston';
 import { config } from '@order/config';
 import { winstonLogger } from '@order/logger';
 import { Channel } from 'amqplib';
-import { createConnection } from './connection';
+import { createOrderConnection } from './connection';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'order-service', 'debug');
 
@@ -15,7 +15,7 @@ export const publicDirectMessage = async (
 ): Promise<void> => {
   try {
     if (!channel) {
-      channel = (await createConnection()) as Channel;
+      channel = (await createOrderConnection()) as Channel;
     }
 
     await channel.assertExchange(exchangeName, 'direct');

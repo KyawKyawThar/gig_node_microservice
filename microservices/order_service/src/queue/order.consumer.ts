@@ -2,15 +2,16 @@ import { Logger } from 'winston';
 import { winstonLogger } from '@order/logger';
 import { config } from '@order/config';
 import { Channel, ConsumeMessage } from 'amqplib';
-import { createConnection } from '@order/queue/connection';
+
 import { updateOrderReview } from '@order/services/order.service';
+import { createOrderConnection } from '@order/queue/connection';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'order-service', 'debug');
 
 export const consumerReviewFanoutMessages = async (channel: Channel): Promise<void> => {
   try {
     if (!channel) {
-      channel = (await createConnection()) as Channel;
+      channel = (await createOrderConnection()) as Channel;
     }
 
     const exchangeName = 'consumer-review';

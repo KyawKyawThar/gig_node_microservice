@@ -47,12 +47,9 @@ export async function consumeAuthEmailMessage(channel: Channel): Promise<void> {
 export async function consumeOrderEmailMessage(channel: Channel): Promise<void> {
   try {
     if (!channel) {
-      const createChannel = await createConnection();
-
-      if (createChannel) {
-        channel = createChannel;
-      }
+      channel = (await createConnection()) as Channel;
     }
+
     await channel.assertExchange(config.ORDER_EXCHANGE_NAME, 'direct');
 
     const assertQueue = await channel.assertQueue(config.ORDER_QUEUE_NAME, { durable: true, autoDelete: false });
@@ -86,6 +83,7 @@ export async function consumeOrderEmailMessage(channel: Channel): Promise<void> 
           serviceFee,
           total
         } = JSON.parse(msg!.content.toString());
+        console.log('notification service email consumer:', template, receiverEmail);
         const mailTransport: mailTransport = {
           appLink: `${config.CLIENT_URL}`,
           // appIcon: 'https://i.ibb.co/Kyp2m0t/cover.png',

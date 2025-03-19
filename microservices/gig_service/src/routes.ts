@@ -6,7 +6,7 @@ import { verifyGigGatewayRequest } from './gigMiddleware';
 import { gigRouter } from './router/gig';
 
 export function appRoutes(app: Application) {
-  app.use(config.GIG_BASE_PATH, healthRouter());
+  app.use('', healthRouter());
 
   app.use(config.GIG_BASE_PATH, verifyGigGatewayRequest, gigRouter());
 }

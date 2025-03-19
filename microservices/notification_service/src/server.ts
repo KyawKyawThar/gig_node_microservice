@@ -9,7 +9,7 @@ import { checkConnection } from '@notifications/elasticSearch';
 import { createConnection } from '@notifications/queues/connection';
 //import { IEmailMessageDetails } from '@notifications/types/emailMessageDetailType';
 
-import { consumeAuthEmailMessage } from './queues/email.consumer';
+import { consumeAuthEmailMessage, consumeOrderEmailMessage } from './queues/email.consumer';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationServer', 'debug');
 
@@ -38,7 +38,7 @@ async function startQueue(): Promise<void> {
     // connection.publish(config.EMAIL_EXCHANGE_NAME, config.EMAIL_ROUTING_KEY, Buffer.from(authMessage));
 
     await consumeAuthEmailMessage(connection);
-    // await consumeOrderEmailMessage(connection);
+    await consumeOrderEmailMessage(connection);
     // await connection.assertExchange(config.ORDER_EXCHANGE_NAME, 'direct');
     // const orderMessage = JSON.stringify({ name: 'nicholas', service: 'order notification service' });
     // connection.publish(config.ORDER_EXCHANGE_NAME, config.ORDER_ROUTING_KEY, Buffer.from(orderMessage));
