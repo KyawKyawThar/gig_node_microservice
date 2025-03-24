@@ -1,6 +1,7 @@
 import { IBuyerReviewMessageDetails, IRatingTypes, ISellerDocument, ISellerOrderMessage } from '@user/types/sellerTypes';
 import { SellerModel } from '@user/model/seller.schema';
 import { updateBuyerIsSellerProp } from '@user/services/buyer.service';
+import { isNumber } from 'lodash';
 
 export const getSellerById = async (sellerId: string): Promise<ISellerDocument | null> => {
   //new mongoose.types.ObjectId(sellerId)
@@ -56,7 +57,12 @@ export const updateTotalGigsCount = async (sellerId: string, count: number): Pro
 };
 
 export const updateSellerOngoingJobsProp = async (sellerId: string, ongoingJob: number): Promise<ISellerDocument | null> => {
-  return (await SellerModel.findByIdAndUpdate({ _id: sellerId }, { $inc: { ongoingJobs: ongoingJob } }).exec()) as ISellerDocument;
+  let ongoingJobs = ongoingJob;
+  if (!isNumber(ongoingJobs)) {
+    ongoingJobs = parseInt(ongoingJobs);
+  }
+
+  return (await SellerModel.findByIdAndUpdate({ _id: sellerId }, { $inc: { ongoingJobs: ongoingJobs } }).exec()) as ISellerDocument;
 };
 
 export const updateSellerCancelledJobsProp = async (sellerId: string): Promise<ISellerDocument | null> => {

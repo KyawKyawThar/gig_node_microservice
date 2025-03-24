@@ -13,7 +13,9 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth-serve
 //can also add expired time in token
 export async function refreshToken(req: Request, res: Response, next: NextFunction) {
   try {
-    const result = await getUserByUsername(req.currentUser.username);
+    const result = await getUserByUsername(req.params.username);
+
+    //console.log('result is:', result);
 
     if (result instanceof DatabaseError) {
       logger.error(`SQL Error Message: ${result.original.message}`);

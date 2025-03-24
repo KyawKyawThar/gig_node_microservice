@@ -36,7 +36,6 @@ class Password {
 
   public async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      console.log('change password');
       const { currentPassword, newPassword } = req.body;
       const response = await authService.changePassword(currentPassword, newPassword);
 
@@ -44,7 +43,7 @@ class Password {
 
       logger.info('User changed password successfully');
     } catch (err) {
-      console.log('changePassword error ', err);
+      //console.log('changePassword error ', err);
       next(err);
     }
   }

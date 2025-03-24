@@ -25,8 +25,8 @@ export async function signIn(req: Request, res: Response, next: NextFunction): P
   try {
     const { email, password, browserName, deviceType } = req.body;
 
-    console.log('Reach in SignIn', req.body);
-    logger.info(req.body);
+    //console.log('Reach in SignIn', req.body);
+    // logger.info(req.body);
     const isValid = isGmail(email);
 
     if (!isValid) {

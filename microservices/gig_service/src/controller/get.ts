@@ -69,6 +69,7 @@ export const gigByCategory = async (req: Request, res: Response, next: NextFunct
 export const topRatedGigsByCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const category = await getUserSelectedCache(`selectedCategories:${req.params.username}`);
+    // console.log('topRatedGigsByCategory', category);
     const gigs = await getTopGigsByCategory(category);
     if (!Object.keys(gigs).length) {
       throw new NotFoundError('top rated gigs by category does not found', 'gig-service topRatedGigsByCategory() method: error');

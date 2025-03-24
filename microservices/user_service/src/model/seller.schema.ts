@@ -55,7 +55,7 @@ const sellerSchema: Schema = new Schema(
     ongoingJobs: { type: Number, default: 0 },
     completedJobs: { type: Number, default: 0 },
     cancelJobs: { type: Number, default: 0 },
-    totalEarning: { type: Number, default: 0 },
+    totalEarnings: { type: Number, default: 0 },
     totalGigs: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now() }
   },

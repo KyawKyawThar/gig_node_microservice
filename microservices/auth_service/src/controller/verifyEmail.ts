@@ -1,5 +1,5 @@
 import { config } from '@auth/config';
-import { BadRequestError, ConflictError, ServerError } from '@auth/errorHandler';
+import { BadRequestError, ConflictError, NotFoundError, ServerError } from '@auth/errorHandler';
 import { winstonLogger } from '@auth/logger';
 import { getUserByEmailVerifyToken, getUserByID, updateVerifyEmail } from '@auth/services/auth.service';
 import { NextFunction, Request, Response } from 'express';
@@ -19,9 +19,13 @@ export async function verifyEmail(req: Request, res: Response, next: NextFunctio
 
     const result = await getUserByEmailVerifyToken(token);
 
+    if (!result) {
+      throw new NotFoundError('verify token not found', 'auth-service verifyEmail method() error');
+    }
+
     if (result instanceof DatabaseError) {
       logger.error(`SQL Error Message: ${result.original.message}`);
-      throw new ServerError(result.original.message, 'auth-service verifyOTP method() error');
+      throw new ServerError(result.original.message, 'auth-service verifyEmail method() error');
     }
     const checkUserIfExists = result as IAuthDocument;
 

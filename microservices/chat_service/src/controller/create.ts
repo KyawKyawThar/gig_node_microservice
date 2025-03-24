@@ -10,8 +10,21 @@ import { StatusCodes } from 'http-status-codes';
 import { winstonLogger } from '@chats/logger';
 import { Logger } from 'winston';
 import { config } from '@chats/config';
+import { v4 as uuidv4 } from 'uuid';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'chat_service', 'debug');
+
+function generateConversationID(buyerId: string, sellerId: string): string {
+  const participants = [buyerId, sellerId];
+
+  const sortedParticipants = participants.sort();
+
+  const participantsString = sortedParticipants.join('_');
+
+  const uniqueID = uuidv4();
+
+  return `${participantsString}_${uniqueID}`;
+}
 
 export const createMessage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -40,9 +53,10 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
       }
       file = uploadURL.secure_url;
     }
+    const conversationId = generateConversationID(req.body.buyerId, req.body.sellerId);
 
     const data: IMessageDocument = {
-      conversationId: req.body?.conversationId,
+      conversationId: conversationId,
       body: req.body.body,
       file,
       fileType: req.body.fileType,

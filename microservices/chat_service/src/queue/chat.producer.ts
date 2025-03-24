@@ -20,7 +20,7 @@ export const publicDirectMessage = async (
 
     await channel.assertExchange(exchangeName, 'direct');
     channel.publish(exchangeName, routingKey, Buffer.from(message));
-    logger.info(logMessage);
+    //logger.info(logMessage);
   } catch (err) {
     logger.log('error', 'ChatService publicDirectMessage() method error: ', err);
   }

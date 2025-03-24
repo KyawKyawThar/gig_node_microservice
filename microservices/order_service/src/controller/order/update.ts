@@ -25,8 +25,6 @@ const stripe = new Stripe(config.STRIPE_API_KEY, { typescript: true });
 
 export const cancel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    console.log('request cancelled is:', req.body.paymentIntentId);
-
     // throw new BadRequestError('this is custom error', 'Create order() method');
     await stripe.refunds.create({
       payment_intent: `${req.body.paymentIntentId}`
@@ -63,8 +61,9 @@ export const deliveryDate = async (req: Request, res: Response, next: NextFuncti
 
     if (type === 'approve') {
       const { error } = orderUpdateSchema.validate(req.body);
+
       if (error?.details) {
-        throw new BadRequestError(error.details[0].message, 'auth-service signUp create() method error');
+        throw new BadRequestError(error?.details[0].message, 'auth-service signUp create() method error');
       }
     }
 

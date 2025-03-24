@@ -10,6 +10,7 @@ heartbeat.monitors:
   schedule: '@every 5s'
   #  hosts: ["http://<your-ip>:4001/notification-health"]
   hosts: ["http://host.docker.internal:4001/notification-health"]
+
   check.request.method: GET
   check.response.status: [200,304]
 
@@ -18,7 +19,7 @@ heartbeat.monitors:
   name: Gateway Service
   schedule: '@every 5s'
   #  hosts: ["http://<your-ip>:4000/gateway-health"]
-  hosts: ["http://host.docker.internal:4000/api/v1/gateway/gateway-health"]
+  hosts: ["http://host.docker.internal:4000/gateway-health"]
   check.request.method: GET
   check.response.status: [200,304]
 
@@ -26,54 +27,52 @@ heartbeat.monitors:
   id: auth_service
   name: Auth Service
   schedule: '@every 5s'
-  hosts: ["http://host.docker.internal:4002/api/v1/auth/auth-health"]
+  hosts: ["http://host.docker.internal:4002/auth-health"]
   check.request.method: GET
   check.response.status: [200,304]
-
+#
 - type: http
-  id: buyer_service
-  name: Buyer Service
+  id: user
+  name: User Service
   schedule: '@every 5s'
-  #  hosts: ['http://<your-ip>:40023/user-health']
-  hosts: ['http://host.docker.internal:4003/api/v1/buyer/user-health']
+  hosts: ['http://host.docker.internal:4003/user-health']
   check.request.method: GET
   check.response.status: [200,304]
-
-
-- type: http
-  id: seller_service
-  name: Seller Service
-  schedule: '@every 5s'
-  #  hosts: ['http://<your-ip>:40023/user-health']
-  hosts: ['http://host.docker.internal:4003/api/v1/seller/user-health']
-  check.request.method: GET
-  check.response.status: [200,304]
+#
 #
 - type: http
   id: gig_service
   name: Gig Service
   schedule: '@every 5s'
   #  hosts: ["http://<your-ip>:4000/gateway-health"]
-  hosts: ["http://host.docker.internal:4004/api/v1/gig/gig-health"]
+  hosts: ["http://host.docker.internal:4004/gig-health"]
+  check.request.method: GET
+  check.response.status: [200,304]
+#
+#
+- type: http
+  id: chat_service
+  name: Chat Service
+  schedule: '@every 5s'
+  hosts: ['http://host.docker.internal:4005/chat-health']
+  check.request.method: GET
+  check.response.status: [200,304]
+#
+- type: http
+  id: order_service
+  name: Order Service
+  schedule: '@every 5s'
+  hosts: ['http://host.docker.internal:4006/order-health']
   check.request.method: GET
   check.response.status: [200,304]
 
-
-#- type: http
-#  id: chat_service
-#  name: Chat Service
-#  schedule: '@every 5s'
-#  hosts: ['http://host.docker.internal:4005/api/v1/message/chat-health']
-#  check.request.method: GET
-#  check.response.status: [200,304]
-#
-#- type: http
-#  id: order_service
-#  name: Order Service
-#  schedule: '@every 5s'
-#  hosts: ['http://host.docker.internal:4006/api/v1/order/order-health']
-#  check.request.method: GET
-#  check.response.status: [200,304]
+- type: http
+  id: review_service
+  name: Review Service
+  schedule: '@every 5s'
+  hosts: ['http://host.docker.internal:4007/review-health']
+  check.request.method: GET
+  check.response.status: [200,304]
 
 processors:
 - add_cloud_metadata: ~
@@ -83,5 +82,5 @@ monitoring.enabled: true
 
 output.elasticsearch:
   hosts: ['http://elasticsearch_container:9200']
-  username: 'elastic'
-  password: 'nicholas145'
+#  username: 'elastic'
+#  password: 'nicholas145'

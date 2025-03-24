@@ -26,7 +26,7 @@ export const consumeGigDirectMessage = async (channel: Channel): Promise<void> =
         const { gigReview } = JSON.parse(msg!.content.toString());
 
         await updateGigReview(JSON.parse(gigReview));
-        channel.ack(gigReview);
+        channel.ack(msg);
       }
     });
   } catch (error) {
@@ -56,7 +56,7 @@ export const consumeGigSeedDirectMessage = async (channel: Channel): Promise<voi
         await gigSeedData(randomSeller, count);
         channel.ack(msg!);
       } else {
-        console.log('code is run in else block');
+        // console.log('code is run in else block');
       }
     });
   } catch (error) {

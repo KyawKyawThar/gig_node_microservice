@@ -19,10 +19,10 @@ export const orderRouter = (): Router => {
   router.put('/cancel/:orderId', cancel);
 
   router.put('/extension/:orderId', requestExtension);
+  router.put('/approve-order/:orderId', buyerApproveOrder);
+
   router.put('/gig/:type/:orderId', deliveryDate);
   router.put('/deliver-order/:orderId', deliverOrder);
-
-  router.put('/approve-order/:orderId', buyerApproveOrder);
 
   router.put('/notification/mark-as-read', markSingleNotificationAsRead);
 

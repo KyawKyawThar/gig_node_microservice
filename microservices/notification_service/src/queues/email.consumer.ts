@@ -50,78 +50,83 @@ export async function consumeOrderEmailMessage(channel: Channel): Promise<void> 
       channel = (await createConnection()) as Channel;
     }
 
-    await channel.assertExchange(config.ORDER_EXCHANGE_NAME, 'direct');
+    await channel.assertExchange('order-notification', 'direct');
 
-    const assertQueue = await channel.assertQueue(config.ORDER_QUEUE_NAME, { durable: true, autoDelete: false });
-    await channel.bindQueue(assertQueue.queue, config.ORDER_EXCHANGE_NAME, config.ORDER_ROUTING_KEY);
+    const assertQueue = await channel.assertQueue('order-queue', { durable: true, autoDelete: false });
+    await channel.bindQueue(assertQueue.queue, 'order-notification', 'order-key');
 
-    await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
-      if (msg) {
-        const {
-          receiverEmail,
-          username,
-          template,
-          sender,
-          offerLink,
-          amount,
-          buyerUsername,
-          sellerUsername,
-          title,
-          description,
-          deliveryDays,
-          orderId,
-          orderDue,
-          requirements,
-          orderUrl,
-          originalDate,
-          newDate,
-          reason,
-          subject,
-          header,
-          type,
-          message,
-          serviceFee,
-          total
-        } = JSON.parse(msg!.content.toString());
-        console.log('notification service email consumer:', template, receiverEmail);
-        const mailTransport: mailTransport = {
-          appLink: `${config.CLIENT_URL}`,
-          // appIcon: 'https://i.ibb.co/Kyp2m0t/cover.png',
-          appIcon: `${config.APP_ICON}`,
-          username,
-          sender,
-          offerLink,
-          amount,
-          buyerUsername,
-          sellerUsername,
-          title,
-          description,
-          deliveryDays,
-          orderId,
-          orderDue,
-          requirements,
-          orderUrl,
-          originalDate,
-          newDate,
-          reason,
-          subject,
-          header,
-          type,
-          message,
-          serviceFee,
-          total
-        };
+    await channel.consume(
+      assertQueue.queue,
+      async (msg: ConsumeMessage | null) => {
+        if (msg) {
+          // console.log('noti in msg....', msg);
+          const {
+            receiverEmail,
+            username,
+            template,
+            sender,
+            offerLink,
+            amount,
+            buyerUsername,
+            sellerUsername,
+            title,
+            description,
+            deliveryDays,
+            orderId,
+            orderDue,
+            requirements,
+            orderUrl,
+            originalDate,
+            newDate,
+            reason,
+            subject,
+            header,
+            type,
+            message,
+            serviceFee,
+            total
+          } = JSON.parse(msg!.content.toString());
+          //console.log('notification service email consumer:', template, receiverEmail);
+          const mailTransport: mailTransport = {
+            appLink: `${config.CLIENT_URL}`,
+            // appIcon: 'https://i.ibb.co/Kyp2m0t/cover.png',
+            appIcon: `${config.APP_ICON}`,
+            username,
+            sender,
+            offerLink,
+            amount,
+            buyerUsername,
+            sellerUsername,
+            title,
+            description,
+            deliveryDays,
+            orderId,
+            orderDue,
+            requirements,
+            orderUrl,
+            originalDate,
+            newDate,
+            reason,
+            subject,
+            header,
+            type,
+            message,
+            serviceFee,
+            total
+          };
 
-        if (template === 'orderPlaced') {
-          await sendEmail('orderPlaced', receiverEmail, mailTransport);
-          await sendEmail('orderReceipt', receiverEmail, mailTransport);
-        } else {
-          await sendEmail(template, receiverEmail, mailTransport);
+          if (template === 'orderPlaced') {
+            await sendEmail('orderPlaced', receiverEmail, mailTransport);
+            await sendEmail('orderReceipt', receiverEmail, mailTransport);
+          } else {
+            await sendEmail(template, receiverEmail, mailTransport);
+          }
+
+          channel.ack(msg);
         }
-
-        channel.ack(msg);
-      }
-    });
+      },
+      { noAck: false }
+    );
   } catch (err) {
     logger.log('error', 'NotificationService OrderEmailConsumer consumeOrderEmailMessage() method error', err);
   }

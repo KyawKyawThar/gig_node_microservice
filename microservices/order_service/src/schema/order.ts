@@ -79,7 +79,7 @@ const orderUpdateSchema: ObjectSchema = Joi.object().keys({
   newDate: Joi.string().required(),
   days: Joi.number().required(),
   reason: Joi.string().required(),
-  deliveryDateUpdate: Joi.string().optional()
+  deliveryDateUpdate: Joi.string().required()
 });
 
 export { orderSchema, orderUpdateSchema };

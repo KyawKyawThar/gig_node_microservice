@@ -14,7 +14,7 @@ class SignIn {
 
       const { message, user, token, browserName, deviceType } = response.data;
 
-      console.log('final ', token);
+      // console.log('final....', token);
       req.session = { jwt: token };
 
       // res.cookie('refreshToken', refreshToken, {

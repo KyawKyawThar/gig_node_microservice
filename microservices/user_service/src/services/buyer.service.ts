@@ -40,6 +40,8 @@ export const updateBuyerPurchasedGigsProp = async (
   purchasedGigId: string,
   type: string
 ): Promise<IBuyerDocument | null> => {
+  //console.log('updateBuyerPurchasedGigsProp.', buyerId, purchasedGigId);
+
   const updatePurchasedGigs = await BuyerModel.updateOne(
     { _id: buyerId },
     type === 'purchased-gigs'

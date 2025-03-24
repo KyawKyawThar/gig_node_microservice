@@ -97,13 +97,12 @@ function createSockIOServer(httpServer: http.Server): Server {
 }
 
 function orderErrorHandler(app: Application) {
-  app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-    logger.error(`order server orderErrorHandler ${err.comingFrom}`);
-
-    if (err instanceof CustomError) {
-      res.status(err.statusCode).json(err.message);
+  app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
+    logger.log('error', `AuthService ${error.comingFrom}:`, error);
+    if (error instanceof CustomError) {
+      res.status(error.statusCode).json(error.serializeError());
     } else {
-      res.status(StatusCodes.BAD_REQUEST).json(err.message);
+      res.status(StatusCodes.BAD_REQUEST).json(error.message);
     }
     next();
   });

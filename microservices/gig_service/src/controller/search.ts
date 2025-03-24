@@ -6,6 +6,7 @@ import { IPaginateProps } from '@gig/types/gigTypes';
 import { gigsSearch } from '@gig/services/search.service';
 import { sortBy } from 'lodash';
 import { StatusCodes } from 'http-status-codes';
+import { NotFoundError } from '@gig/errorHandler';
 
 const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gig-service', 'debug');
 
@@ -15,7 +16,7 @@ export const gigs = async (req: Request, res: Response, next: NextFunction): Pro
 
     const paginate: IPaginateProps = { from, size: parseInt(`${size}`), type };
 
-    console.log('first', req.query.query);
+    //console.log('first', req.query.query);
     const gigs = await gigsSearch(
       `${req.query.query}`,
       paginate,
@@ -23,6 +24,10 @@ export const gigs = async (req: Request, res: Response, next: NextFunction): Pro
       parseInt(`${req.query.minPrice}`),
       parseInt(`${req.query.maxPrice}`)
     );
+
+    if (!gigs.total) {
+      throw new NotFoundError('There is no result for this search', 'gig-service searchGigs() method: error');
+    }
     let resultHits = gigs.hits.map((item) => item._source);
 
     if (type === 'backward') {

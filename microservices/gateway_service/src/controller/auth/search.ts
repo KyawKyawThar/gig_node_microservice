@@ -28,18 +28,18 @@ class Search {
   public async gigs(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { from, size, type } = req.params;
-      console.log('before:', req.query);
+      //console.log('before:', req.query);
       let queryString = '';
       const objectLists = Object.entries(req.query);
       logger.info(`Object list: ${objectLists}`);
       const lastIndex = objectLists.length - 1;
 
       objectLists.forEach(([key, value], index) => {
-        console.log('object list key & value: ', key, value);
+        // console.log('object list key & value: ', key, value);
         queryString += `${key}=${value}${index !== lastIndex ? '&' : ''}`;
       });
 
-      console.log('after:', queryString);
+      //console.log('after:', queryString);
       const result = await authService.gigs(from, size, type, queryString);
       res.status(StatusCodes.OK).json({ message: result.data.message, total: result.data.total.value, data: result.data.gigs });
       logger.info('Search authService gigs have been successfully');

@@ -63,7 +63,8 @@ export const getReviewsByGigId = async (gigId: string): Promise<IReviewDocument[
 };
 
 export const getReviewsBySellerId = async (sellerId: string): Promise<IReviewDocument[]> => {
-  const { rows } = await pool.query('SELECT * FROM reviews WHERE reviews.sellerId = $1 AND reviews.reviewType = $2', [
+  // console.log('getReviewsBySellerId', sellerId);
+  const { rows } = await pool.query('SELECT * FROM reviews WHERE reviews.sellerid = $1 AND reviews.reviewType = $2', [
     sellerId,
     'seller-review'
   ]);

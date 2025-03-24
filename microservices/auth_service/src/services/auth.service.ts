@@ -107,7 +107,7 @@ export async function getUserByEmailVerifyToken(token: string): Promise<IAuthDoc
 export async function updateVerifyEmail(authId: number, emailVerified: number, emailVerificationToken?: string): Promise<Error | null> {
   // Explicitly return DatabaseError or null
   try {
-    console.log({ authId, emailVerified, emailVerificationToken });
+    //console.log({ authId, emailVerified, emailVerificationToken });
 
     await AuthModel.update(!emailVerificationToken ? { emailVerified } : { emailVerified, emailVerificationToken }, {
       where: { id: authId }

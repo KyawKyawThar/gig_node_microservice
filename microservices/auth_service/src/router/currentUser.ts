@@ -6,7 +6,7 @@ const router: Router = express.Router();
 
 export function currentUserRouter() {
   router.get('/current-user', currentUser);
-  router.get('/refresh-token/', refreshToken);
+  router.get('/refresh-token/:username', refreshToken);
   router.post('/resend-email', resendEmail);
   return router;
 }
