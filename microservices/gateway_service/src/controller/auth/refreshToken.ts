@@ -9,10 +9,11 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'gateway se
 class Refresh {
   public async token(req: Request, res: Response, next: NextFunction): Promise<void> {
     //user: token, refreshToken: refreshToken
-    try {
-      console.log('gateway service refreshToken', req.cookies);
 
-      const response = await authService.getRefreshToken();
+    try {
+      //console.log('gateway service refreshToken', req.cookies);
+
+      const response = await authService.getRefreshToken(req.params.username);
 
       // res.cookie('refreshToken', response.data.refreshToken, {
       //   httpOnly: true,

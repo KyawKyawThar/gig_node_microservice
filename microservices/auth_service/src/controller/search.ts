@@ -27,7 +27,6 @@ export async function gigs(req: Request, res: Response, next: NextFunction): Pro
   try {
     const { type, size, from } = req.params;
 
-    console.log('auth_first', req.query.query);
     const paginate: IPaginateProps = { from, size: parseInt(`${size}`), type };
 
     // if (!req.currentUser && req.query) {
@@ -42,8 +41,8 @@ export async function gigs(req: Request, res: Response, next: NextFunction): Pro
       parseInt(`${req.query.maxPrice}`)
     );
 
-    if (!gigs.hits.length) {
-      throw new NotFoundError('There is no result for this search', 'gig-service sellerInactiveGigs() method: error');
+    if (!gigs.total) {
+      throw new NotFoundError('There is no result for this search', 'auth-service gigs() method: error');
     }
     let resultHits = gigs.hits.map((item) => item._source);
 

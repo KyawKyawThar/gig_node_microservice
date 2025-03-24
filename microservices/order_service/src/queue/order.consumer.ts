@@ -14,7 +14,7 @@ export const consumerReviewFanoutMessages = async (channel: Channel): Promise<vo
       channel = (await createOrderConnection()) as Channel;
     }
 
-    const exchangeName = 'consumer-review';
+    const exchangeName = 'user-review-update';
     const queueName = 'consumer-review-queues';
 
     await channel.assertExchange(exchangeName, 'fanout');
@@ -23,6 +23,7 @@ export const consumerReviewFanoutMessages = async (channel: Channel): Promise<vo
     await channel.bindQueue(assertQueue.queue, exchangeName, '');
 
     await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
+      //console.log('consumerReviewFanoutMessages', JSON.parse(msg!.content.toString()));
       if (msg) {
         await updateOrderReview(JSON.parse(msg!.content.toString()));
         channel.ack(msg!);

@@ -18,6 +18,7 @@ export function verifyAuthGatewayRequest(req: Request, _res: Response, next: Nex
       return next(new NotAuthorizedError('Request is not for auth service', 'verifyAuthGatewayRequest() method'));
     }
   } catch (error) {
+    //console.log('authMiddleware error', error);
     return next(new NotAuthorizedError('Request payload is invalid', 'verifyAuthGatewayRequest() method'));
   }
 

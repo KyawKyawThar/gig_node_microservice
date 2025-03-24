@@ -17,7 +17,6 @@ export const createConversation = async (conversationId: string, sender: string,
 export const addMessage = async (message: IMessageDocument): Promise<IMessageDocument> => {
   const create = (await messageModel.create(message)) as IMessageDocument;
 
-  console.log('addMessage...', create);
   const emailMessageDetail: IMessageDetails = {
     sender: message.senderUsername,
     amount: message.offer?.price,
@@ -58,10 +57,7 @@ export const getConversation = async (sender: string, receiver: string): Promise
 
 export const getUserConversationList = async (username: string): Promise<IMessageDocument[]> => {
   const query = {
-    $or: [
-      { senderUsername: username }, // Match documents where senderUsername is 'Manny'
-      { receiverUsername: username } // Match documents where receiverUsername is 'Manny'
-    ]
+    $or: [{ senderUsername: username }, { receiverUsername: username }]
   };
 
   const conversationLists: IMessageDocument[] = await messageModel.aggregate([
@@ -154,7 +150,6 @@ export const markMessageAsRead = async (messageId: string): Promise<IMessageDocu
 export const markManyMessagesAsRead = async (messageId: string, sender: string, receiver: string): Promise<IMessageDocument> => {
   await messageModel.updateMany(
     {
-      _id: messageId,
       senderUsername: sender,
       receiverUsername: receiver,
       isRead: false

@@ -19,7 +19,7 @@ export async function gigBySearch(
     {
       query_string: {
         fields: ['username', 'title', 'description', 'basicDescription', 'basicTitle', 'categories', 'subCategories', 'tags'],
-        query: `*${searchQuery}*`
+        query: searchQuery !== 'undefined' ? `*${searchQuery}*` : '*'
       }
     },
     {

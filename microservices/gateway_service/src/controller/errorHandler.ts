@@ -16,7 +16,6 @@ export class ErrorHandlerController {
   }
 
   public static handleGlobalErrors(err: IErrorResponse, _req: Request, res: Response, next: NextFunction) {
-    console.log('axosErrorCode', err);
     if (err instanceof CustomError) {
       return res.status(err.statusCode).json(err.serializeError());
     }
@@ -24,6 +23,13 @@ export class ErrorHandlerController {
     if (isAxiosError(err)) {
       const axiosError = err as AxiosErrorWithServiceName;
       const serviceName = axiosError.serviceName || 'unknown-service';
+
+      // if (err.message === 'Request failed with status code 404') {
+      //   console.log('cdoe should run in here....');
+      //   return res.status(StatusCodes.NOT_FOUND).json({
+      //     message: 'Search gigs does not exists'
+      //   });
+      // }
 
       if (axiosError.code === 'ECONNREFUSED') {
         logger.error(`GatewayService Axios Error - ${serviceName}: Service is not reachable.`);
@@ -35,10 +41,11 @@ export class ErrorHandlerController {
       return res.status(err?.response?.data?.statusCode ?? StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: err?.response?.data ?? 'Something went wrong..'
       });
+    } else {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'An unexpected error occurred.' });
     }
 
-    logger.error(`Unhandled error: ${err.message}`);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'An unexpected error occurred.' });
+    // logger.error(`Unhandled error: ${err.message}`);
     next();
   }
 }

@@ -22,7 +22,6 @@ export const markMultipleMessages = async (req: Request, res: Response, next: Ne
   try {
     const { messageId, senderUsername, receiverUsername } = req.body;
 
-    console.log('mark-multiple-as-read called...');
     await markManyMessagesAsRead(messageId, senderUsername, receiverUsername);
     res.status(StatusCodes.OK).json({ message: 'Messages marked as read' });
     logger.info('chat_service  markMultipleMessages successfully.');

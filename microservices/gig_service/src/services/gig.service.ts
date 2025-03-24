@@ -89,8 +89,8 @@ export const updateGigReview = async (data: IBuyerReviewMessageDetails): Promise
       $inc: {
         ratingsCount: 1,
         ratingSum: data.rating,
-        [`ratingCategories${ratingKey}.value`]: data.rating,
-        [`ratingCategories${ratingKey}.count`]: 1
+        [`ratingCategories.${ratingKey}.value`]: data.rating,
+        [`ratingCategories.${ratingKey}.count`]: 1
       }
     },
     { new: true, upsert: true }
@@ -98,8 +98,10 @@ export const updateGigReview = async (data: IBuyerReviewMessageDetails): Promise
 
   if (document) {
     const updateGig = document.toJSON?.() as ISellerGig;
+    //console.log('updateGig is:', updateGig);
     await updateIndexData(config.GIGS, updateGig.id!, updateGig);
   }
+
   return document;
 };
 
@@ -114,7 +116,7 @@ export const updateActiveGig = async (gigId: string, active: boolean): Promise<I
     { new: true }
   )) as ISellerGig;
 
-  console.log(updateActiveGig);
+  // console.log(updateActiveGig);
 
   if (updateActiveGig) {
     const gigData = updateActiveGig.toJSON?.() as ISellerGig;
@@ -185,7 +187,7 @@ export const gigSeedData = async (seller: ISellerDocument[], count: string): Pro
       ratingsCount: (i + 1) % 4 === 0 ? rating!['count'] : 0,
       ratingSum: (i + 1) % 4 === 0 ? rating!['sum'] : 0
     };
-    console.log(`***SEEDING GIG*** - ${i + 1} of ${count}`);
+    //console.log(`***SEEDING GIG*** - ${i + 1} of ${count}`);
 
     const data = await createGig(gig);
 

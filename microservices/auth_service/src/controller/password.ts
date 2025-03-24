@@ -25,15 +25,16 @@ export async function forgetPassword(req: Request, res: Response, next: NextFunc
 
     const result = await getUserByEmail(req.body.email);
 
+    if (!result) {
+      throw new NotFoundError(' user does not exist', 'auth-service resendEmail method() error');
+    }
+
     if (result instanceof DatabaseError) {
       logger.error(`SQL Error Message: ${result.original.message}`);
       throw new ServerError(result.original.message, 'auth-service forgetPassword method() error');
     }
 
     const user = result as IAuthDocument;
-    if (!user) {
-      throw new NotFoundError('User does not exist', 'auth-service forgetPassword() method error');
-    }
 
     const tokenExpiredDate = new Date();
     tokenExpiredDate.setHours(tokenExpiredDate.getHours() + 1);
@@ -132,8 +133,6 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
     }
 
     const { currentPassword, newPassword } = req.body;
-
-    console.log({ currentPassword, newPassword });
 
     const result = await getUserByEmail(req.currentUser.email);
 

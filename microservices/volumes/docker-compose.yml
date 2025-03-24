@@ -65,26 +65,24 @@ services:
       - elasticsearch
 
   metricbeat:
-     container_name: metricbeat_container
-     image: docker.elastic.co/beats/metricbeat:8.15.0
-     #able to allow metricbeat to read docker socket
-     user: root
-     ports:
-       - "5066:5066"
-     command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
-     depends_on:
-       - elasticsearch
-     restart: always
-     networks:
-       - elastic
-     volumes:
-       - ./metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
-       # docker module
-       - /var/run/docker.sock:/var/run/docker.sock:ro
-        # system module
-       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-       - /proc:/hostfs/proc:ro
-       - /:/hostfs:ro
+    container_name: metricbeat_container
+    image: docker.elastic.co/beats/metricbeat:8.15.0
+    user: root
+    ports:
+      - 5066:5066
+    networks:
+      - elastic
+    volumes:
+      - ./metricbeat.yml/:/usr/share/metricbeat/metricbeat.yml:ro
+      # docker module
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # system module
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /proc:/hostfs/proc:ro
+      - /:/hostfs:ro
+    command: [ "--strict.perms=false", "-system.hostfs=/hostfs" ]
+    depends_on:
+      - elasticsearch
 
   apmServer:
      container_name: apm_server_container
@@ -107,21 +105,21 @@ services:
          -E strict.perms=false
          -E apm-server.auth.anonymous.enabled=true
 
-#  heartbeat:
-#    container_name: heartbeat_container
-#    image: docker.elastic.co/beats/heartbeat:8.15.0
-#    user: root
-#    hostname: heartbeat
-#    # add capabilities for docker
-#    cap_add:
-#      - NET_RAW
-#    volumes:
-#      - ./heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro
-#    networks:
-#      - elastic
-#    depends_on:
-#      - elasticsearch
-#    command: [ "--strict.perms=false" ]
+  heartbeat:
+    container_name: heartbeat_container
+    image: docker.elastic.co/beats/heartbeat:8.15.0
+    user: root
+    hostname: heartbeat
+    # add capabilities for docker
+    cap_add:
+      - NET_RAW
+    volumes:
+      - ./heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro
+    networks:
+      - elastic
+    depends_on:
+      - elasticsearch
+    command: [ "--strict.perms=false" ]
 
 
 #  filebeat:

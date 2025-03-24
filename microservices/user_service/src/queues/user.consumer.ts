@@ -48,6 +48,7 @@ export const consumeBuyerDirectMessage = async (channel: Channel): Promise<void>
           logger.info('rabbit mq Buyer created successfully from auth service', buyer);
         } else {
           const { buyerId, purchasedGigs } = JSON.parse(msg!.content.toString());
+
           await updateBuyerPurchasedGigsProp(buyerId, purchasedGigs, type);
         }
         channel.ack(msg);
@@ -62,37 +63,38 @@ export const consumeSellerDirectMessage = async (channel: Channel): Promise<void
   try {
     if (!channel) {
       channel = (await createConnection()) as Channel;
-      const exchangeName = 'user-seller-update';
-      const routingKey = 'user-seller';
-      const queueName = 'user-seller-queue';
-
-      await channel.assertExchange(exchangeName, 'direct');
-      const assertQueue = await channel.assertQueue(queueName, { durable: true, autoDelete: false });
-      await channel.bindQueue(assertQueue.queue, exchangeName, routingKey);
-
-      await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
-        if (msg) {
-          const { type, count, sellerId, ongoingJobs, completedJobs, totalEarnings, recentDelivery } = JSON.parse(msg!.content.toString());
-          console.log('user-consumer type is:', type);
-          switch (type) {
-            case 'create-order':
-              await updateSellerOngoingJobsProp(sellerId, ongoingJobs);
-              break;
-            case 'update-gig-count':
-              await updateTotalGigsCount(sellerId, count);
-              break;
-            case 'approve-order':
-              await updateSellerCompletedJobsProp({ sellerId, ongoingJobs, completedJobs, totalEarnings, recentDelivery });
-              break;
-
-            case 'cancel-order':
-              await updateSellerCancelledJobsProp(sellerId);
-              break;
-          }
-          channel.ack(msg);
-        }
-      });
     }
+
+    const exchangeName = 'user-seller-update';
+    const routingKey = 'user-seller';
+    const queueName = 'user-seller-queue';
+
+    await channel.assertExchange(exchangeName, 'direct');
+    const assertQueue = await channel.assertQueue(queueName, { durable: true, autoDelete: false });
+    await channel.bindQueue(assertQueue.queue, exchangeName, routingKey);
+
+    await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
+      if (msg) {
+        let { type, count, sellerId, ongoingJobs, completedJobs, totalEarnings, recentDelivery } = JSON.parse(msg!.content.toString());
+
+        switch (type) {
+          case 'create-order':
+            await updateSellerOngoingJobsProp(sellerId, ongoingJobs);
+            break;
+          case 'update-gig-count':
+            await updateTotalGigsCount(sellerId, count);
+            break;
+          case 'approve-order':
+            await updateSellerCompletedJobsProp({ sellerId, ongoingJobs, completedJobs, totalEarnings, recentDelivery });
+            break;
+
+          case 'cancel-order':
+            await updateSellerCancelledJobsProp(sellerId);
+            break;
+        }
+        channel.ack(msg);
+      }
+    });
   } catch (error) {
     logger.log('error', 'UserService buyer consumeBuyerDirectMessage() method error:', error);
   }
@@ -102,32 +104,32 @@ export const consumeReviewFanoutDirectMessage = async (channel: Channel): Promis
   try {
     if (!channel) {
       channel = (await createConnection()) as Channel;
-      const exchangeName = 'user-review-update';
-      const queueName = 'user-review-queue';
-
-      await channel.assertExchange(exchangeName, 'fanout');
-      const assertQueue = await channel.assertQueue(queueName, { durable: true, autoDelete: false });
-      await channel.bindQueue(assertQueue.queue, exchangeName, queueName);
-
-      await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
-        if (msg) {
-          const buyerReview = JSON.parse(msg!.content.toString());
-          logger.info('consumeReviewFanoutDirectMessage');
-          if (buyerReview.type === 'buyer-review') {
-            await updateSellerReview(buyerReview);
-
-            await publicDirectMessage(
-              channel,
-              'user-update-gig',
-              'update-gigs',
-              JSON.stringify({ type: 'updateGig', gigReview: msg!.content.toString() }),
-              'Message sent to gig service'
-            );
-          }
-          channel.ack(msg);
-        }
-      });
     }
+    const exchangeName = 'user-review-update';
+    const queueName = 'user-review-queue';
+
+    await channel.assertExchange(exchangeName, 'fanout');
+    const assertQueue = await channel.assertQueue(queueName, { durable: true, autoDelete: false });
+    await channel.bindQueue(assertQueue.queue, exchangeName, queueName);
+
+    await channel.consume(assertQueue.queue, async (msg: ConsumeMessage | null) => {
+      if (msg) {
+        const buyerReview = JSON.parse(msg!.content.toString());
+        //console.log('consumeReviewFanoutDirectMessage', buyerReview);
+        if (buyerReview.type.toLowerCase() === 'buyer-review') {
+          await updateSellerReview(buyerReview);
+
+          await publicDirectMessage(
+            channel,
+            'user-update-gig',
+            'update-gigs',
+            JSON.stringify({ type: 'updateGig', gigReview: msg!.content.toString() }),
+            'Message sent to gig service'
+          );
+        }
+        channel.ack(msg);
+      }
+    });
   } catch (error) {
     logger.log('error', 'UserService consumeReviewDirectMessage() method error: ', error);
   }

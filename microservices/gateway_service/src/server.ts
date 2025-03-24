@@ -52,6 +52,9 @@ export class GateWayService {
         name: 'session',
         keys: [config.SECRET_KEY_ONE, config.SECRET_KEY_TWO],
         secure: config.NODE_ENV !== 'development',
+        ...(config.NODE_ENV !== 'development' && {
+          sameSite: 'none'
+        }),
         maxAge: 15 * 60 * 1000
       })
     );

@@ -9,14 +9,14 @@ output.elasticsearch:
   hosts: 'http://elasticsearch_container:9200'
   enabled: true
   protocol: "http"
-  username: "elastic"
-  password: "nicholas145"
+#  username: "elastic"
+#  password: "nicholas145"
   ssl.enabled: false
 
 monitoring.enabled: true
 
 monitoring.elasticsearch:
   protocol: "http"
-  username: "elastic"
-  password: "nicholas145"
+#  username: "elastic"
+#  password: "nicholas145"
   hosts: 'http://elasticsearch_container:9200'

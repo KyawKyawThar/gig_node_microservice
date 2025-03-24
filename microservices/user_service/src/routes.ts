@@ -7,8 +7,7 @@ import { sellerRouter } from '@user/router/seller';
 import { sellerSeedRouter } from './router/seed';
 
 export function appRoutes(app: Application): void {
-  app.use(config.BUYER_BASE_PATH, healthRouter());
-  app.use(config.SELLER_BASE_PATH, healthRouter());
+  app.use('', healthRouter());
 
   app.use(config.SELLER_BASE_PATH, sellerSeedRouter());
 

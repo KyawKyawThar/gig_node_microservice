@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
 import { config } from '@auth/config';
-import { BadRequestError, ServerError } from '@auth/errorHandler';
+import { BadRequestError, NotFoundError, ServerError } from '@auth/errorHandler';
 import { winstonLogger } from '@auth/logger';
 import { getUserByEmail, getUserByID, updateVerifyEmail } from '@auth/services/auth.service';
 import { NextFunction, Request, Response } from 'express';
@@ -17,6 +17,10 @@ const logger: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'auth-serve
 export async function currentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = await getUserByID(req.currentUser.id);
+
+    if (!result) {
+      throw new NotFoundError('current user does not exist', 'auth-service resendEmail method() error');
+    }
 
     if (result instanceof DatabaseError) {
       logger.error(`SQL Error Message: ${result.original.message}`);
@@ -41,6 +45,10 @@ export async function resendEmail(req: Request, res: Response, next: NextFunctio
     const { email } = req.body;
 
     const result = await getUserByEmail(email.toLowerCase());
+
+    if (!result) {
+      throw new NotFoundError('this email address does not exist', 'auth-service resendEmail method() error');
+    }
 
     if (result instanceof DatabaseError) {
       logger.error(`SQL Error Message: ${result.original.message}`);

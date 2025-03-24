@@ -22,10 +22,10 @@ class AuthMiddleware {
     try {
       const payload: IAuthPayload = verify(req.session?.jwt, `${config.JWT_SECRET}`) as IAuthPayload;
       req.currentUser = payload;
-      next();
     } catch (e) {
       next(new NotAuthorizedError('Token is not available! Please log in to get access.', 'Gateway service verifyUser() method'));
     }
+    next();
   }
 
   public verifyRefreshToken(req: Request, _res: Response, next: NextFunction): void {

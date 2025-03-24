@@ -41,8 +41,8 @@ class AuthService {
     const response: AxiosResponse = await axiosAuthInstance.post('/resend-email', body);
     return response;
   }
-  async getRefreshToken(): Promise<AxiosResponse> {
-    const response: AxiosResponse = await axiosAuthInstance.get('/refresh-token/');
+  async getRefreshToken(username: string): Promise<AxiosResponse> {
+    const response: AxiosResponse = await axiosAuthInstance.get(`/refresh-token/${username}`);
     return response;
   }
 

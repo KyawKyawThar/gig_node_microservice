@@ -66,11 +66,12 @@ export const gigsSearch = async (
 ): Promise<ISearchResult> => {
   const { from, size, type } = paginate;
 
+  //console.log(searchQuery ? 'YES' : 'NO');
   const queryList: IQueryList[] = [
     {
       query_string: {
         fields: ['username', 'title', 'description', 'basicDescription', 'basicTitle', 'categories', 'subCategories', 'tags'],
-        query: `*${searchQuery}*`
+        query: searchQuery !== 'undefined' ? `*${searchQuery}*` : '*'
       }
     },
     { term: { active: true } }

@@ -59,7 +59,6 @@ const securityMiddleware = (app: Application): void => {
   app.use(limiter);
 
   app.use(async (req: Request, _res: Response, next: NextFunction) => {
-    logger.info(req.url);
     if (req.headers?.authorization && req.headers.authorization.startsWith('Bearer')) {
       const token = req.headers.authorization.split(' ')[1];
       const payload = verify(token, config.JWT_SECRET) as IAuthPayload;

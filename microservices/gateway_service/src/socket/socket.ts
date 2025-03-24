@@ -25,8 +25,10 @@ export class SocketIOAppHandler {
     this.chatSocketIOPrivateConnection();
     this.orderSocketPrivateConnection();
     this.io.on('connection', async (socket: Socket) => {
-      socket.on('category', async (category: string, username: string) => {
-        await this.gateWayCache.saveUserSelectedCategory(`selectedCategories:${username}`, category);
+      socket.on('category', async (data: { category: string; username: string }) => {
+        const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+
+        await this.gateWayCache.saveUserSelectedCategory(`selectedCategories:${parsedData.username}`, parsedData.category);
       });
 
       socket.on('getLoggedInUser', async () => {
@@ -52,7 +54,7 @@ export class SocketIOAppHandler {
     });
 
     chatSocketClient.on('connect', () => {
-      console.log('socket connected chat service', chatSocketClient.id);
+      // console.log('socket connected chat service', chatSocketClient.id);
       logger.info('Chat service socket connected');
     });
 

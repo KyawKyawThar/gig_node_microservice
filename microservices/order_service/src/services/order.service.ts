@@ -126,16 +126,16 @@ export const approveOrder = async (orderId: string, data: IOrderMessage): Promis
     'user-seller-update',
     'user-seller',
     JSON.stringify(messageDetails),
-    'Approved order details sent to users service.'
+    'Approved updated user-info order details sent to users service.'
   );
 
-  //updated seller-info
+  // updated seller-info
   await publicDirectMessage(
     orderChannel,
     'user-buyer-update',
     'user-buyer',
     JSON.stringify({ type: 'purchased-gigs', buyerId: data.buyerId, purchasedGigs: data.purchasedGigs }),
-    'Approved order details sent to users service.'
+    'Approved updated seller-info order details sent to users service.'
   );
 
   //will go to seller
@@ -248,28 +248,29 @@ export const approveDeliveryDate = async (orderId: string, data: IExtendedDelive
       { new: true }
     )
     .exec()) as IOrderDocument;
-  if (order) {
-    const messageDetails: IOrderMessage = {
-      subject: 'Congratulations: Your extension request was approved',
-      buyerUsername: lowerCase(order.buyerUsername),
-      sellerUsername: lowerCase(order.sellerUsername),
-      header: 'Request Accepted',
-      receiverEmail: order.buyerEmail,
-      type: 'accepted',
-      message: 'You can continue working on the order.',
-      orderUrl: `${config.CLIENT_URL}/orders/${orderId}/activities`,
-      template: 'orderExtensionApproval'
-    };
-    // send email
-    await publicDirectMessage(
-      orderChannel,
-      'order-notification',
-      'order-email',
-      JSON.stringify(messageDetails),
-      'Order request extension approval message sent to notification service.'
-    );
-    await sendNotification(order.sellerUsername, order, 'approved your order delivery date extension request.');
-  }
+
+  const messageDetails: IOrderMessage = {
+    subject: 'Congratulations: Your extension request was approved',
+    buyerUsername: lowerCase(order.buyerUsername),
+    sellerUsername: lowerCase(order.sellerUsername),
+    header: 'Request Accepted',
+    receiverEmail: order.buyerEmail,
+    type: 'accepted',
+    message: 'You can continue working on the order.',
+    orderUrl: `${config.CLIENT_URL}/orders/${orderId}/activities`,
+    template: 'orderExtensionApproval'
+  };
+  //console.log('messageDetails is:', messageDetails);
+  // send email
+  await publicDirectMessage(
+    orderChannel,
+    'order-notification',
+    'order-key',
+    JSON.stringify(messageDetails),
+    'Order request extension approval message sent to notification service.'
+  );
+  await sendNotification(order.sellerUsername, order, 'approved your order delivery date extension request.');
+
   return order;
 };
 
@@ -307,7 +308,7 @@ export const rejectDeliveryDate = async (orderId: string): Promise<IOrderDocumen
     await publicDirectMessage(
       orderChannel,
       'order-notification',
-      'order-email',
+      'order-key',
       JSON.stringify(messageDetails),
       'Order request extension rejection message sent to notification service.'
     );
@@ -317,12 +318,13 @@ export const rejectDeliveryDate = async (orderId: string): Promise<IOrderDocumen
 };
 
 export const updateOrderReview = async (data: IReviewMessageDetails): Promise<IOrderDocument> => {
+  // console.log('orderId is:', data.orderId);
   const order: IOrderDocument = (await orderModel
     .findOneAndUpdate(
       { orderId: data.orderId },
       {
         $set:
-          data.type === 'buyer-review'
+          data.type.toLowerCase() === 'buyer-review'
             ? {
                 buyerReview: {
                   rating: data.rating,
@@ -343,10 +345,13 @@ export const updateOrderReview = async (data: IReviewMessageDetails): Promise<IO
       { new: true }
     )
     .exec()) as IOrderDocument;
-  await sendNotification(
-    data.type === 'buyer-review' ? order.sellerUsername : order.buyerUsername,
-    order,
-    `left you a ${data.rating} star review`
-  );
+
+  if (order) {
+    await sendNotification(
+      data.type === 'buyer-review' ? order.sellerUsername : order.buyerUsername,
+      order,
+      `left you a ${data.rating} star review`
+    );
+  }
   return order;
 };

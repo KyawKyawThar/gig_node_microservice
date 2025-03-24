@@ -64,7 +64,7 @@ export async function addIndexData(indexName: string, indexId: string, gigDocume
   try {
     const result = await elasticSearchClient.index({ index: indexName, id: indexId, document: gigDocument });
 
-    console.log('addIndexData...', result);
+    //    console.log('addIndexData...', result);
   } catch (error) {
     logger.log('error', 'GigService elasticsearch addIndexData() method error:', error);
   }

@@ -18,6 +18,7 @@ class GatewayCache {
       if (!this.client.isOpen) {
         await this.client.connect();
       }
+
       await this.client.SET(key, value);
     } catch (error) {
       logger.log('error', 'GatewayService Cache saveUserSelectedCategory() method error:', error);

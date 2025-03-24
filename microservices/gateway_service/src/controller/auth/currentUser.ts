@@ -35,7 +35,6 @@ class CurrentUser {
     try {
       const response = await gateCache.getLoggedInUsersFromCache('loggedInUsers');
 
-      console.log('response is:', response);
       socketIO.emit('online', response);
 
       res.status(StatusCodes.OK).json({ message: 'User is online', data: response });

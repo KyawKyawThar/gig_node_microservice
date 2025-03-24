@@ -61,10 +61,9 @@ function securityMiddleware(app: Application): void {
   app.use(async (req: Request, _res: Response, next: NextFunction) => {
     if (req.headers?.authorization && req.headers.authorization.startsWith('Bearer')) {
       const token = req.headers.authorization.split(' ')[1];
-      console.log('authService cookies', req.cookies);
+      // console.log('authService cookies', req.cookies);
       const payload = verify(token, config.JWT_SECRET) as IAuthPayload;
       req.currentUser = payload;
-      logger.info('auth-service', req.url);
     }
     next();
   });
